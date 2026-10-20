@@ -13,9 +13,20 @@ All text lives in [`prototype/src/i18n.json`](prototype/src/i18n.json), English 
 Ukrainian side by side. The build refuses to run if a key is missing in either language.
 
 ```bash
-cd prototype/tools && npm install && npm run build   # → prototype/dist (pages, favicons, PDFs)
-node check.mjs http://127.0.0.1:8080                 # browser checks against a served dist/
+cd prototype/tools
+npm install && npx playwright install chromium   # once: build tools and the browser they drive
+npm test                                         # unit tests
+npm run build                                    # → prototype/dist: /, /uk/, 404, favicons, PDFs
+python3 -m http.server 8080 --bind 127.0.0.1 -d ../dist   # serve dist/ (another terminal)
+npm run check                                    # browser + axe checks against the served dist/
 ```
+
+**Deploying:** `dist/` is build output and is not committed. The build needs Chromium
+(for the PDFs), so it runs in GitHub Actions, which then uploads `dist/` to Cloudflare Pages.
+The public address is set once in `prototype/tools/build.mjs` (`SITE`).
+
+**Known gap:** the page uses inline scripts and styles, so a strict Content Security Policy
+would need hashes. Planned for the Astro build, together with security headers.
 
 ## Stack
 

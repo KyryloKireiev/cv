@@ -35,6 +35,7 @@
   --bg: var(--rg-cream); --surface: var(--rg-white); --fg: var(--rg-graphite); --muted: var(--rg-muted-on-light);
   --line: var(--rg-cream-200); --accent-lg: var(--rg-green); --accent: var(--rg-green-700); --wave-3: var(--rg-green-700);
   --card-edge: none;
+  --focus: var(--rg-graphite);
 
   --font-web: "Barlow Semi Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
   --font-button: "Barlow", "Roboto Condensed", Arial, sans-serif;
@@ -49,13 +50,17 @@
   --bg: var(--rg-graphite); --surface: var(--rg-graphite-800); --fg: var(--rg-cream); --muted: var(--rg-muted-on-dark);
   --line: var(--hairline-dark); --accent-lg: var(--rg-peach); --accent: var(--rg-peach); --wave-3: var(--rg-muted-on-dark);
   --card-edge: inset 0 0 0 1px var(--hairline-dark);
+  --focus: var(--rg-peach);
   color-scheme: dark;
 }
+/* focus ring colour per surface, each ≥ 3:1 against what sits around it */
+.band.dark, .band.deep, .rack, footer { --focus: var(--rg-peach); }
+.band.green { --focus: var(--rg-green-900); }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body { margin: 0; background: var(--bg); color: var(--fg); font: 400 18px/1.55 var(--font-web); }
 a { color: inherit; }
-:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 .wrap { max-width: 1200px; margin: 0 auto; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
 .eyebrow { font: 600 14px/1.2 var(--font-web); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .ico { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
@@ -115,8 +120,8 @@ h1 .acc { color: var(--accent-lg); }
 .contact { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; margin-top: 28px; }
 .mail { display: inline-flex; position: relative; }
 .mail .copy { padding: 0 12px; box-shadow: inset 1px 0 0 rgba(255,255,255,.3); }
-.toast { position: absolute; left: 100%; top: 50%; margin-left: 8px; transform: translateY(-50%); font: 600 14px var(--font-button); color: var(--accent); opacity: 0; transition: opacity .2s; white-space: nowrap; display: flex; gap: 4px; align-items: center; }
-.toast.on { opacity: 1; }
+.toast { position: absolute; left: 100%; top: 50%; margin-left: 8px; transform: translateY(-50%); font: 600 14px var(--font-button); color: var(--accent); white-space: nowrap; }
+.toast:empty { display: none; }
 .socials { display: flex; flex-wrap: nowrap; gap: 20px; }
 .out { text-decoration: none; font: 500 16px var(--font-web); display: inline-flex; gap: 2px; align-items: center; white-space: nowrap; }
 .out:hover { color: var(--accent); }
@@ -135,7 +140,14 @@ h1 .acc { color: var(--accent-lg); }
 @keyframes led { 50% { background: var(--rg-peach); } }
 
 /* waveform: three lines, slow, each at its own speed */
-.wave { display: block; width: 100%; height: 80px; margin-top: 56px; }
+.wave-row { position: relative; margin-top: 56px; }
+.wave { display: block; width: 100%; height: 80px; }
+.pause { position: absolute; right: max(24px, env(safe-area-inset-right, 0px)); top: -40px; width: 32px; height: 32px; display: grid; place-items: center; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+.pause:hover { color: var(--fg); }
+.pause .i-play, .paused .pause .i-pause { display: none; }
+.paused .pause .i-play { display: block; }
+/* WCAG 2.2.2: one control pauses every ambient animation */
+.paused .wave g, .paused .brand .sq, .paused .readout .cur { animation-play-state: paused; }
 .wave path { fill: none; stroke-width: 2; }
 .wave .t1 { animation: flow 22s linear infinite; }
 .wave .t2 { animation: flow 31s linear infinite; }
@@ -193,7 +205,9 @@ h2 .acc { color: var(--accent-lg); }
 .tabs button::after { content: ""; position: absolute; left: 18px; right: 18px; bottom: -1px; height: 3px; background: var(--rg-peach); transform: scaleX(0); transition: transform .25s; }
 .tabs button[aria-selected="true"] { color: var(--fg); }
 .tabs button[aria-selected="true"]::after { transform: scaleX(1); }
-.case { display: grid; grid-template-columns: 1.05fr 1fr; gap: 32px; margin-top: 32px; align-items: start; }
+.case { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 32px; margin-top: 32px; align-items: start; }
+/* long words (Ukrainian especially) wrap instead of widening the page */
+.card h3, .mod b, .mod small, .area h4, h2 { overflow-wrap: anywhere; hyphens: auto; }
 .panel[hidden] { display: none; }
 .panel:not([hidden]) .case > * { animation: rise .45s both; }
 .panel:not([hidden]) .case > *:nth-child(2) { animation-delay: .08s; }
@@ -202,7 +216,7 @@ h2 .acc { color: var(--accent-lg); }
 .rack { background: var(--rg-graphite); color: var(--rg-cream); clip-path: var(--clip); padding: 24px 20px 20px; position: sticky; top: 140px; }
 :root[data-theme="dark"] .rack { box-shadow: inset 0 0 0 1px var(--hairline-dark); }
 .rack .rhead { display: flex; justify-content: space-between; gap: 12px; font: 600 13px var(--font-web); letter-spacing: .08em; text-transform: uppercase; color: var(--rg-muted-on-dark); padding-left: 12px; }
-.bay { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+.bay { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-top: 16px; }
 .mod { position: relative; text-align: left; background: var(--rg-graphite-800); border: 0; box-shadow: inset 0 0 0 1px var(--hairline-dark); color: inherit; padding: 14px; min-height: 112px; cursor: pointer; font: inherit; transition: box-shadow .2s; }
 .mod:hover, .mod[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--rg-peach); }
 .jacks { display: flex; gap: 8px; margin-bottom: 10px; }
@@ -250,7 +264,7 @@ svg.cables circle { fill: var(--rg-cream); }
 .prlinks .ico { width: 14px; height: 14px; }
 
 /* 04 learner path */
-.path { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 26px 0 4px; }
+.path { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 26px 0 4px; margin: 0; list-style: none; }
 .path::before { content: ""; position: absolute; left: 12%; right: 12%; top: 11px; height: 2px; background: var(--line); }
 .path .step { position: relative; text-align: center; font: 600 13px var(--font-web); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); transition: color .3s; }
 .path .step::before { content: ""; position: absolute; left: 50%; top: -20px; width: 10px; height: 10px; margin-left: -5px; background: var(--surface); box-shadow: inset 0 0 0 2px var(--muted); transition: background .3s, box-shadow .3s; }
@@ -302,22 +316,30 @@ footer a { color: var(--rg-cream); }
 
 @media (max-width: 900px) {
   nav.links { display: none; }
-  .hero-grid, .case, .sec-head { grid-template-columns: 1fr; gap: 32px; }
+  .hero-grid, .case, .sec-head { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .card h3 { font-size: 28px; }
   .timeline { margin-left: 0; }
   .areas { grid-template-columns: 1fr; }
   .rack { position: static; }
+  .tabs { position: static; }
   .sk { grid-template-columns: 1fr; gap: 8px; }
 }
 @media (max-width: 520px) {
+  .toast { left: 0; top: 100%; margin: 8px 0 0; transform: none; }
   .wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   header.nav .wrap { gap: 8px; }
   .brand { font-size: 16px; gap: 8px; }
   .tools { gap: 4px; margin-left: auto; }
   .langs a { padding: 0 7px; }
   .icon-btn { width: 36px; }
-  .btn-pdf span, .btn-email span { display: none; }
+  /* icon-only buttons keep their accessible name */
+  .btn-pdf span, .btn-email span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .btn-pdf, .btn-email { padding: 0 9px; }
   .socials { gap: 14px; }
+}
+@media (max-width: 359px) {
+  .btn-email { display: none; } /* the hero has the same email button */
+  .socials { flex-wrap: wrap; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -328,8 +350,8 @@ footer a { color: var(--rg-cream); }
 @media print {
   @page { size: A4; margin: 12mm 13mm 13mm; }
   :root { --bg: #fff; --surface: #fff; --fg: #323232; --muted: #6B6560; --accent-lg: #37604F; --accent: #37604F; --line: #EDE7E1; --card-edge: none; }
-  body { font-size: 11pt; line-height: 1.4; background: #fff; }
-  header.nav, .skip, .wave, .rack, .tabs, .showall, .copy, .toast, .used, .band.green, .path, .board-wrap, .sec-head p, .metric .live, .rotor .slot { display: none !important; }
+  body { font-size: 10.5pt; line-height: 1.35; background: #fff; }
+  header.nav, .skip, .wave-row, .rack, .tabs, .showall, .copy, .toast, .used, .band.green, .path, .board-wrap, .sec-head p, .metric .live, .rotor .slot { display: none !important; }
   .rotor-all { display: inline; position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; color: #37604F; }
   .wrap { max-width: none; padding: 0; }
   .hero { padding: 0; }
@@ -384,6 +406,8 @@ footer a { color: var(--rg-cream); }
   <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></symbol>
   <symbol id="i-mail" viewBox="0 0 24 24"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/></symbol>
   <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="14" y="3" width="5" height="18" rx="1"/><rect x="5" y="3" width="5" height="18" rx="1"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
   <symbol id="i-sun-moon" viewBox="0 0 24 24"><path d="M12 2v2"/><path d="M14.837 16.385a6 6 0 1 1-7.223-7.222c.624-.147.97.66.715 1.248a4 4 0 0 0 5.26 5.259c.589-.255 1.396.09 1.248.715"/><path d="M16 12a4 4 0 0 0-4-4"/><path d="m19 5-1.256 1.256"/><path d="M20 12h2"/></symbol>
 </svg>
@@ -400,7 +424,7 @@ footer a { color: var(--rg-cream); }
       <a href="#contact" data-i18n="nav.contact"></a>
     </nav>
     <div class="tools">
-      <span class="langs" role="group" data-i18n-attr="aria-label:a11y.lang"><a href="/" hreflang="en" lang="en" data-lang="en">EN</a><a href="/uk/" hreflang="uk" lang="uk" data-lang="uk">UK</a></span>
+      <span class="langs" role="group" data-i18n-attr="aria-label:a11y.lang"><a href="/" hreflang="en" lang="en" data-lang="en">EN</a><a href="/uk/" hreflang="uk" lang="uk" data-lang="uk">UA</a></span>
       <button class="icon-btn" type="button" id="theme" data-i18n-attr="aria-label:a11y.theme"><svg class="ico" aria-hidden="true"><use href="#i-sun-moon"/></svg></button>
       <a class="btn btn-outline btn-sm btn-pdf" data-i18n-attr="href:pdf.file" download><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg><span data-i18n="btn.pdf"></span></a>
       <a class="btn btn-green btn-email" href="mailto:kirillkireev888@gmail.com"><svg class="ico" aria-hidden="true"><use href="#i-mail"/></svg><span data-i18n="btn.email"></span></a>
@@ -424,7 +448,7 @@ footer a { color: var(--rg-cream); }
             <span class="mail">
               <a class="btn btn-green" href="mailto:kirillkireev888@gmail.com"><svg class="ico" aria-hidden="true"><use href="#i-mail"/></svg>kirillkireev888@gmail.com</a>
               <button class="btn btn-green copy" type="button" id="copy" data-email="kirillkireev888@gmail.com" data-i18n-attr="aria-label:a11y.copy"><svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg></button>
-              <span class="toast" id="toast" role="status"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><span data-i18n="toast.copied"></span></span>
+              <span class="toast" id="toast" role="status"></span>
             </span>
             <span class="socials">
               <a class="out" href="https://github.com/KyryloKireiev" target="_blank" rel="noopener noreferrer">GitHub<svg class="ico" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
@@ -448,11 +472,14 @@ footer a { color: var(--rg-cream); }
         </div>
       </div>
     </div>
-    <svg class="wave" viewBox="0 0 2400 80" preserveAspectRatio="none" aria-hidden="true">
-      <g class="t1"><path id="w1" stroke="#559479"/></g>
-      <g class="t2"><path id="w2" stroke="#F89D6A"/></g>
-      <g class="t3"><path id="w3"/></g>
-    </svg>
+    <div class="wave-row">
+      <button class="pause" type="button" id="pause" aria-pressed="false" data-i18n-attr="aria-label:a11y.pause"><svg class="ico i-pause" aria-hidden="true"><use href="#i-pause"/></svg><svg class="ico i-play" aria-hidden="true"><use href="#i-play"/></svg></button>
+      <svg class="wave" viewBox="0 0 2400 80" preserveAspectRatio="none" aria-hidden="true">
+        <g class="t1"><path id="w1" stroke="#559479"/></g>
+        <g class="t2"><path id="w2" stroke="#F89D6A"/></g>
+        <g class="t3"><path id="w3"/></g>
+      </svg>
+    </div>
   </div>
 
   <section class="band dark" id="experience">
@@ -505,7 +532,7 @@ footer a { color: var(--rg-cream); }
               <button class="mod" type="button" aria-pressed="false" data-id="bank" data-i18n-text="c1.m.bank.x"><span class="led"></span><span class="jacks"><span class="jack"></span><span class="jack"></span></span><b data-i18n="c1.m.bank.b"></b><small data-i18n="c1.m.bank.s"></small></button>
               <button class="mod" type="button" aria-pressed="false" data-id="db" data-i18n-text="c1.m.db.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b>PostgreSQL</b><small data-i18n="c1.m.db.s"></small></button>
             </div>
-            <div class="readout" aria-live="polite"><span class="p">›</span> <span class="tx" data-i18n="c1.ready"></span> <span class="cur"></span></div>
+            <div class="readout"><span aria-hidden="true"><span class="p">›</span><span class="tx" data-i18n="c1.ready"></span> <span class="cur"></span></span><span class="sr-only live" aria-live="polite"></span></div>
           </div>
           <article class="card">
             <div class="top"><span class="pill" data-i18n="c1.pill"></span><span data-i18n="c1.when"></span></div>
@@ -535,7 +562,7 @@ footer a { color: var(--rg-cream); }
               <button class="mod" type="button" aria-pressed="false" data-id="m6" data-i18n-text="c2.m6.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b>enterprise #2488</b><small data-i18n="c2.m6.s"></small></button>
               <button class="mod" type="button" aria-pressed="false" data-id="m7" data-i18n-text="c2.m7.x"><span class="led amber"></span><span class="jacks"><span class="jack"></span></span><b>authoring #2749</b><small data-i18n="c2.m7.s"></small></button>
             </div>
-            <div class="readout" aria-live="polite"><span class="p">›</span> <span class="tx" data-i18n="c2.ready"></span> <span class="cur"></span></div>
+            <div class="readout"><span aria-hidden="true"><span class="p">›</span><span class="tx" data-i18n="c2.ready"></span> <span class="cur"></span></span><span class="sr-only live" aria-live="polite"></span></div>
           </div>
           <article class="card">
             <div class="top"><span class="pill" data-i18n="c2.pill"></span><span>2023 – 2025</span></div>
@@ -571,7 +598,7 @@ footer a { color: var(--rg-cream); }
               <button class="mod" type="button" aria-pressed="false" data-id="mcp" data-i18n-text="c3.m.mcp.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b data-i18n="c3.m.mcp.b"></b><small data-i18n="c3.m.mcp.s"></small></button>
               <button class="mod" type="button" aria-pressed="false" data-id="qdrant" data-i18n-text="c3.m.qdrant.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b>Qdrant</b><small data-i18n="c3.m.qdrant.s"></small></button>
             </div>
-            <div class="readout" aria-live="polite"><span class="p">›</span> <span class="tx" data-i18n="c3.ready"></span> <span class="cur"></span></div>
+            <div class="readout"><span aria-hidden="true"><span class="p">›</span><span class="tx" data-i18n="c3.ready"></span> <span class="cur"></span></span><span class="sr-only live" aria-live="polite"></span></div>
           </div>
           <article class="card">
             <div class="top"><span class="pill" data-i18n="c3.pill"></span><span data-i18n="c3.when"></span></div>
@@ -600,7 +627,7 @@ footer a { color: var(--rg-cream); }
               <button class="mod" type="button" aria-pressed="false" data-id="upload" data-step="3" data-i18n-text="c4.m.upload.x"><span class="led"></span><span class="jacks"><span class="jack"></span><span class="jack"></span></span><b data-i18n="c4.m.upload.b"></b><small>XBlock</small></button>
               <button class="mod" type="button" aria-pressed="false" data-id="office" data-step="3" data-i18n-text="c4.m.office.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b data-i18n="c4.m.office.b"></b><small data-i18n="c4.m.office.s"></small></button>
             </div>
-            <div class="readout" aria-live="polite"><span class="p">›</span> <span class="tx" data-i18n="c4.ready"></span> <span class="cur"></span></div>
+            <div class="readout"><span aria-hidden="true"><span class="p">›</span><span class="tx" data-i18n="c4.ready"></span> <span class="cur"></span></span><span class="sr-only live" aria-live="polite"></span></div>
           </div>
           <article class="card">
             <div class="top"><span class="pill" data-i18n="c4.pill"></span><span data-i18n="c4.when"></span></div>
@@ -608,10 +635,10 @@ footer a { color: var(--rg-cream); }
             <div class="ctx" data-i18n="c4.ctx"></div>
             <dl class="kv"><dt data-i18n="lbl.role"></dt><dd data-i18n="c4.role"></dd></dl>
             <div class="prob"><div class="lbl" data-i18n="lbl.problem"></div><span data-i18n="c4.problem"></span></div>
-            <div class="path" role="img" data-i18n-attr="aria-label:a11y.pathLabel">
-              <span class="step" data-i18n="c4.p1"></span><span class="step" data-i18n="c4.p2"></span><span class="step" data-i18n="c4.p3"></span><span class="step" data-i18n="c4.p4"></span>
-              <i class="dot" aria-hidden="true"></i>
-            </div>
+            <ol class="path" data-i18n-attr="aria-label:a11y.pathLabel">
+              <li class="step" data-i18n="c4.p1"></li><li class="step" data-i18n="c4.p2"></li><li class="step" data-i18n="c4.p3"></li><li class="step" data-i18n="c4.p4"></li>
+              <li class="dot" aria-hidden="true"></li>
+            </ol>
             <div class="did"><div class="lbl" data-i18n="lbl.did"></div><ul><li data-i18n="c4.d1"></li><li data-i18n="c4.d2"></li><li data-i18n="c4.d3"></li></ul></div>
             <div class="nums"><div><b data-count="100" data-prefix="~">~100</b><span data-i18n="c4.n1"></span></div><div><b data-count="26">26</b><span data-i18n="c4.n2"></span></div><div><b data-count="4">4</b><span data-i18n="c4.n3"></span></div></div>
             <div class="stack">Python · Django · XBlocks · Open edX Studio · React MFE · Tutor</div>
@@ -632,7 +659,7 @@ footer a { color: var(--rg-cream); }
               <button class="mod" type="button" aria-pressed="false" data-id="board" data-score="1" data-i18n-text="c5.m.board.x"><span class="led"></span><span class="jacks"><span class="jack"></span><span class="jack"></span></span><b data-i18n="c5.m.board.b"></b><small data-i18n="c5.m.board.s"></small></button>
               <button class="mod" type="button" aria-pressed="false" data-id="avatars" data-i18n-text="c5.m.avatars.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b data-i18n="c5.m.avatars.b"></b><small>DRF</small></button>
             </div>
-            <div class="readout" aria-live="polite"><span class="p">›</span> <span class="tx" data-i18n="c5.ready"></span> <span class="cur"></span></div>
+            <div class="readout"><span aria-hidden="true"><span class="p">›</span><span class="tx" data-i18n="c5.ready"></span> <span class="cur"></span></span><span class="sr-only live" aria-live="polite"></span></div>
           </div>
           <article class="card">
             <div class="top"><span class="pill" data-i18n="c5.pill"></span><span data-i18n="c5.when"></span></div>
@@ -711,28 +738,44 @@ footer a { color: var(--rg-cream); }
 
   // copy email
   const copy = document.getElementById("copy"), toast = document.getElementById("toast");
+  let toastTimer;
   copy.addEventListener("click", async () => {
+    // the status region stays empty until something happened, so nothing is announced early
+    let msg = T.copied;
     try { await navigator.clipboard.writeText(copy.dataset.email); }
-    catch (e) { const s = getSelection(), rg = document.createRange(); rg.selectNodeContents(copy.previousElementSibling); s.removeAllRanges(); s.addRange(rg); }
-    toast.classList.add("on"); setTimeout(() => toast.classList.remove("on"), 1600);
+    catch (e) { const s = getSelection(), rg = document.createRange(); rg.selectNodeContents(copy.previousElementSibling); s.removeAllRanges(); s.addRange(rg); msg = T.copyFail; }
+    toast.textContent = msg; clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { toast.textContent = ""; }, msg === T.copied ? 1600 : 4000);
   });
 
-  // years in production, from the start month; "4+" only once 4 full years have passed
+  // years in production since the start month (same rule as tools/years.mjs):
+  // under 4 full years the count is rounded (47 months → "4"); from 4 years on it is
+  // whole years, with "+" for any extra months (48 → "4", 49 → "4+", 60 → "5")
   const prod = document.getElementById("prod");
   (function () {
     const [y, m] = prod.dataset.since.split("-").map(Number), now = new Date();
     const months = (now.getFullYear() - y) * 12 + (now.getMonth() + 1 - m);
-    const full = Math.floor(months / 12), n = months >= 48 && months % 12 ? full : Math.round(months / 12);
-    const label = months >= 48 && months % 12 ? n + "+" : String(n);
-    const form = new Intl.PluralRules(lang).select(n);
-    prod.textContent = (T.years[form] || T.years.other).replace("{n}", label);
+    const plus = months >= 48 && months % 12 !== 0;
+    const n = plus ? Math.floor(months / 12) : Math.round(months / 12);
+    prod.textContent = T.years[new Intl.PluralRules(lang).select(n)].replace("{n}", plus ? n + "+" : String(n));
   })();
+
+  // one control pauses every ambient animation (WCAG 2.2.2); the choice is remembered
+  const pauseBtn = document.getElementById("pause");
+  function setPaused(on) {
+    root.classList.toggle("paused", on);
+    pauseBtn.setAttribute("aria-pressed", String(on));
+    pauseBtn.setAttribute("aria-label", on ? T.play : T.pause);
+    try { localStorage.setItem("paused", on ? "1" : "0"); } catch (e) {}
+  }
+  pauseBtn.addEventListener("click", () => setPaused(!root.classList.contains("paused")));
+  try { if (localStorage.getItem("paused") === "1") setPaused(true); } catch (e) {}
 
   // rotating "I build …"
   const slot = document.getElementById("slot"); let wi = 0;
   slot.firstElementChild.textContent = T.rotor[0];
   if (!reduce) setInterval(() => {
-    if (document.hidden) return;
+    if (document.hidden || root.classList.contains("paused")) return;
     wi = (wi + 1) % T.rotor.length;
     const old = slot.firstElementChild; old.className = "out";
     const n = document.createElement("span"); n.className = "in"; n.textContent = T.rotor[wi]; slot.appendChild(n);
@@ -782,17 +825,22 @@ footer a { color: var(--rg-cream); }
       (function step(t) { const k = Math.min(1, (t - t0) / 700); const pt = p.getPointAtLength((fwd ? k : 1 - k) * L); c.setAttribute("cx", pt.x); c.setAttribute("cy", pt.y); if (k < 1) requestAnimationFrame(step); else c.remove(); })(t0);
     });
   }
-  // readout prints word by word, like a streaming model reply
+  // readout prints word by word, like a streaming model reply; screen readers get the
+  // whole sentence once through a separate live region (the typed copy is aria-hidden)
   function type(out, text) {
     const tx = out.querySelector(".tx"); clearInterval(out._t);
-    if (reduce) { tx.textContent = text; return; }
+    out.querySelector(".live").textContent = text;
+    if (reduce || root.classList.contains("paused")) { tx.textContent = text; return; }
     const words = text.split(" "); let i = 0; tx.textContent = "";
     out._t = setInterval(() => { tx.textContent += (i ? " " : "") + words[i++]; if (i >= words.length) clearInterval(out._t); }, 45);
   }
   // 04: learner path follows the clicked module's step
   function moveDot(panel, step) {
     const path = panel.querySelector(".path"); if (!path) return;
-    path.querySelectorAll(".step").forEach((s, i) => s.classList.toggle("done", i <= step));
+    path.querySelectorAll(".step").forEach((s, i) => {
+      s.classList.toggle("done", i <= step);
+      if (i === step) s.setAttribute("aria-current", "step"); else s.removeAttribute("aria-current");
+    });
     path.querySelector(".dot").style.left = (12.5 + step * 25) + "%";
   }
   // 05: illustrative leaderboard scores and reorders (FLIP)

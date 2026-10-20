@@ -4,9 +4,12 @@
   "type": "module",
   "description": "Builds the v0 CV site: translated pages, favicons and PDFs",
   "scripts": {
-    "build": "node build.mjs"
+    "build": "node build.mjs",
+    "test": "node --test years.test.mjs",
+    "check": "node check.mjs"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
     "playwright": "1.56.1"
   }
 }
