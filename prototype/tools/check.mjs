@@ -120,6 +120,32 @@ for (const [code, path] of LOCALES) {
     await c.close();
   }
 
+  // ---- copy status never covers the links (success and failure, phone and tablet) ----
+  for (const width of [375, 800]) {
+    for (const fails of [false, true]) {
+      const c = await browser.newContext({ viewport: { width, height: 900 }, permissions: ["clipboard-read", "clipboard-write"] });
+      if (fails) await c.addInitScript(() => { navigator.clipboard.writeText = () => Promise.reject(new Error("denied")); });
+      const p = await c.newPage();
+      await p.goto(origin + path, { waitUntil: "networkidle" });
+      await p.click("#copy");
+      const hit = await p.evaluate(() => {
+        const t = document.getElementById("toast").getBoundingClientRect();
+        return [...document.querySelectorAll(".socials a, .mail .btn")].some((a) => {
+          const r = a.getBoundingClientRect();
+          return t.width && r.left < t.right && t.left < r.right && r.top < t.bottom && t.top < r.bottom;
+        });
+      });
+      ok(!hit, `${code}: copy ${fails ? "failure" : "success"} message overlaps a link at ${width}px`);
+      await c.close();
+    }
+  }
+
+  // ---- rack starting texts are available to screen readers before any click ----
+  const sr = await browser.newPage(); await sr.goto(origin + path);
+  const empties = await sr.$$eval(".readout .live", (els) => els.filter((e) => !e.textContent.trim()).length);
+  ok(empties === 0, `${code}: ${empties} rack readout(s) have no screen-reader text on load`);
+  await sr.close();
+
   // ---- reduced motion: nothing hidden; JS off: content present ----
   const rm = await browser.newContext({ reducedMotion: "reduce" }); const rp = await rm.newPage();
   await rp.goto(origin + path, { waitUntil: "networkidle" });
@@ -133,6 +159,18 @@ for (const [code, path] of LOCALES) {
 
   console.log(`${code}: checked`);
 }
+
+// ---- 404 page: loads, links home in both languages, passes axe in both themes ----
+for (const theme of ["light", "dark"]) {
+  const c = await browser.newContext({ colorScheme: theme }); const p = await c.newPage();
+  const r = await p.goto(origin + "/404.html");
+  ok(r.ok() && (await p.$$eval("a[href]", (as) => as.map((a) => a.getAttribute("href")))).join() === "/,/uk/", `404 (${theme}): page or home links wrong`);
+  const axe = await new AxeBuilder({ page: p }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
+  for (const v of axe.violations) ok(false, `404 ${theme}: axe ${v.id} × ${v.nodes.length}`);
+  ok((await p.$eval("h1", (h) => parseFloat(getComputedStyle(h).fontSize))) >= 90, `404 (${theme}): heading not at display size`);
+  await c.close();
+}
+console.log("404: checked");
 
 await browser.close();
 console.log(problems.length ? `\n${problems.length} PROBLEM(S):\n- ${problems.join("\n- ")}` : "\nAll checks passed.");

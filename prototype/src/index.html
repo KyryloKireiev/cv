@@ -120,8 +120,9 @@ h1 .acc { color: var(--accent-lg); }
 .contact { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; margin-top: 28px; }
 .mail { display: inline-flex; position: relative; }
 .mail .copy { padding: 0 12px; box-shadow: inset 1px 0 0 rgba(255,255,255,.3); }
-.toast { position: absolute; left: 100%; top: 50%; margin-left: 8px; transform: translateY(-50%); font: 600 14px var(--font-button); color: var(--accent); white-space: nowrap; }
-.toast:empty { display: none; }
+/* copy status: its own reserved row under the contact links, so it never covers them;
+   the empty region stays in the accessibility tree so the change is announced */
+.toast { flex-basis: 100%; min-height: 1.4em; margin-top: -4px; font: 600 14px var(--font-button); color: var(--accent); }
 .socials { display: flex; flex-wrap: nowrap; gap: 20px; }
 .out { text-decoration: none; font: 500 16px var(--font-web); display: inline-flex; gap: 2px; align-items: center; white-space: nowrap; }
 .out:hover { color: var(--accent); }
@@ -325,7 +326,6 @@ footer a { color: var(--rg-cream); }
   .sk { grid-template-columns: 1fr; gap: 8px; }
 }
 @media (max-width: 520px) {
-  .toast { left: 0; top: 100%; margin: 8px 0 0; transform: none; }
   .wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   header.nav .wrap { gap: 8px; }
   .brand { font-size: 16px; gap: 8px; }
@@ -448,7 +448,6 @@ footer a { color: var(--rg-cream); }
             <span class="mail">
               <a class="btn btn-green" href="mailto:kirillkireev888@gmail.com"><svg class="ico" aria-hidden="true"><use href="#i-mail"/></svg>kirillkireev888@gmail.com</a>
               <button class="btn btn-green copy" type="button" id="copy" data-email="kirillkireev888@gmail.com" data-i18n-attr="aria-label:a11y.copy"><svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg></button>
-              <span class="toast" id="toast" role="status"></span>
             </span>
             <span class="socials">
               <a class="out" href="https://github.com/KyryloKireiev" target="_blank" rel="noopener noreferrer">GitHub<svg class="ico" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
@@ -456,6 +455,7 @@ footer a { color: var(--rg-cream); }
               <a class="out" href="https://t.me/Kyrylo_Kireiev" target="_blank" rel="noopener noreferrer">Telegram<svg class="ico" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
               <a class="out" href="https://www.facebook.com/profile.php?id=100017270206165" target="_blank" rel="noopener noreferrer">Facebook<svg class="ico" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
             </span>
+            <span class="toast" id="toast" role="status"></span>
           </div>
           <dl class="meta">
             <div><dt data-i18n="meta.location"></dt><dd data-i18n="meta.locationValue"></dd></div>
@@ -532,7 +532,7 @@ footer a { color: var(--rg-cream); }
               <button class="mod" type="button" aria-pressed="false" data-id="bank" data-i18n-text="c1.m.bank.x"><span class="led"></span><span class="jacks"><span class="jack"></span><span class="jack"></span></span><b data-i18n="c1.m.bank.b"></b><small data-i18n="c1.m.bank.s"></small></button>
               <button class="mod" type="button" aria-pressed="false" data-id="db" data-i18n-text="c1.m.db.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b>PostgreSQL</b><small data-i18n="c1.m.db.s"></small></button>
             </div>
-            <div class="readout"><span aria-hidden="true"><span class="p">›</span><span class="tx" data-i18n="c1.ready"></span> <span class="cur"></span></span><span class="sr-only live" aria-live="polite"></span></div>
+            <div class="readout"><span aria-hidden="true"><span class="p">›</span><span class="tx" data-i18n="c1.ready"></span> <span class="cur"></span></span><span class="sr-only live" aria-live="polite" data-i18n="c1.ready"></span></div>
           </div>
           <article class="card">
             <div class="top"><span class="pill" data-i18n="c1.pill"></span><span data-i18n="c1.when"></span></div>
@@ -562,7 +562,7 @@ footer a { color: var(--rg-cream); }
               <button class="mod" type="button" aria-pressed="false" data-id="m6" data-i18n-text="c2.m6.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b>enterprise #2488</b><small data-i18n="c2.m6.s"></small></button>
               <button class="mod" type="button" aria-pressed="false" data-id="m7" data-i18n-text="c2.m7.x"><span class="led amber"></span><span class="jacks"><span class="jack"></span></span><b>authoring #2749</b><small data-i18n="c2.m7.s"></small></button>
             </div>
-            <div class="readout"><span aria-hidden="true"><span class="p">›</span><span class="tx" data-i18n="c2.ready"></span> <span class="cur"></span></span><span class="sr-only live" aria-live="polite"></span></div>
+            <div class="readout"><span aria-hidden="true"><span class="p">›</span><span class="tx" data-i18n="c2.ready"></span> <span class="cur"></span></span><span class="sr-only live" aria-live="polite" data-i18n="c2.ready"></span></div>
           </div>
           <article class="card">
             <div class="top"><span class="pill" data-i18n="c2.pill"></span><span>2023 – 2025</span></div>
@@ -598,7 +598,7 @@ footer a { color: var(--rg-cream); }
               <button class="mod" type="button" aria-pressed="false" data-id="mcp" data-i18n-text="c3.m.mcp.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b data-i18n="c3.m.mcp.b"></b><small data-i18n="c3.m.mcp.s"></small></button>
               <button class="mod" type="button" aria-pressed="false" data-id="qdrant" data-i18n-text="c3.m.qdrant.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b>Qdrant</b><small data-i18n="c3.m.qdrant.s"></small></button>
             </div>
-            <div class="readout"><span aria-hidden="true"><span class="p">›</span><span class="tx" data-i18n="c3.ready"></span> <span class="cur"></span></span><span class="sr-only live" aria-live="polite"></span></div>
+            <div class="readout"><span aria-hidden="true"><span class="p">›</span><span class="tx" data-i18n="c3.ready"></span> <span class="cur"></span></span><span class="sr-only live" aria-live="polite" data-i18n="c3.ready"></span></div>
           </div>
           <article class="card">
             <div class="top"><span class="pill" data-i18n="c3.pill"></span><span data-i18n="c3.when"></span></div>
@@ -627,7 +627,7 @@ footer a { color: var(--rg-cream); }
               <button class="mod" type="button" aria-pressed="false" data-id="upload" data-step="3" data-i18n-text="c4.m.upload.x"><span class="led"></span><span class="jacks"><span class="jack"></span><span class="jack"></span></span><b data-i18n="c4.m.upload.b"></b><small>XBlock</small></button>
               <button class="mod" type="button" aria-pressed="false" data-id="office" data-step="3" data-i18n-text="c4.m.office.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b data-i18n="c4.m.office.b"></b><small data-i18n="c4.m.office.s"></small></button>
             </div>
-            <div class="readout"><span aria-hidden="true"><span class="p">›</span><span class="tx" data-i18n="c4.ready"></span> <span class="cur"></span></span><span class="sr-only live" aria-live="polite"></span></div>
+            <div class="readout"><span aria-hidden="true"><span class="p">›</span><span class="tx" data-i18n="c4.ready"></span> <span class="cur"></span></span><span class="sr-only live" aria-live="polite" data-i18n="c4.ready"></span></div>
           </div>
           <article class="card">
             <div class="top"><span class="pill" data-i18n="c4.pill"></span><span data-i18n="c4.when"></span></div>
@@ -659,7 +659,7 @@ footer a { color: var(--rg-cream); }
               <button class="mod" type="button" aria-pressed="false" data-id="board" data-score="1" data-i18n-text="c5.m.board.x"><span class="led"></span><span class="jacks"><span class="jack"></span><span class="jack"></span></span><b data-i18n="c5.m.board.b"></b><small data-i18n="c5.m.board.s"></small></button>
               <button class="mod" type="button" aria-pressed="false" data-id="avatars" data-i18n-text="c5.m.avatars.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b data-i18n="c5.m.avatars.b"></b><small>DRF</small></button>
             </div>
-            <div class="readout"><span aria-hidden="true"><span class="p">›</span><span class="tx" data-i18n="c5.ready"></span> <span class="cur"></span></span><span class="sr-only live" aria-live="polite"></span></div>
+            <div class="readout"><span aria-hidden="true"><span class="p">›</span><span class="tx" data-i18n="c5.ready"></span> <span class="cur"></span></span><span class="sr-only live" aria-live="polite" data-i18n="c5.ready"></span></div>
           </div>
           <article class="card">
             <div class="top"><span class="pill" data-i18n="c5.pill"></span><span data-i18n="c5.when"></span></div>
@@ -760,12 +760,12 @@ footer a { color: var(--rg-cream); }
     prod.textContent = T.years[new Intl.PluralRules(lang).select(n)].replace("{n}", plus ? n + "+" : String(n));
   })();
 
-  // one control pauses every ambient animation (WCAG 2.2.2); the choice is remembered
+  // one control pauses every ambient animation (WCAG 2.2.2); the choice is remembered.
+  // Fixed name "Pause animations" + aria-pressed, so "pressed" always means "paused".
   const pauseBtn = document.getElementById("pause");
   function setPaused(on) {
     root.classList.toggle("paused", on);
     pauseBtn.setAttribute("aria-pressed", String(on));
-    pauseBtn.setAttribute("aria-label", on ? T.play : T.pause);
     try { localStorage.setItem("paused", on ? "1" : "0"); } catch (e) {}
   }
   pauseBtn.addEventListener("click", () => setPaused(!root.classList.contains("paused")));

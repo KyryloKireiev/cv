@@ -111,7 +111,7 @@ for (const loc of LOCALES) {
 
   const runtime = {
     rotor: t["hero.rotor"], years, showAll: t["exp.showAll"], showFewer: t["exp.showFewer"],
-    copied: t["toast.copied"], copyFail: t["toast.copyFail"], pause: t["a11y.pause"], play: t["a11y.play"],
+    copied: t["toast.copied"], copyFail: t["toast.copyFail"],
   };
   const json = JSON.stringify(runtime).replace(/</g, "\\u003c");
   const scripts = `<script id="t" type="application/json">${json}</script>\n${appMatch[0]}\n</body>`;
@@ -128,7 +128,7 @@ await writeFile(join(DIST, "404.html"), `<!DOCTYPE html>
 <title>404 · Kyrylo Kireiev</title><meta name="robots" content="noindex">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/fonts.css">
 <style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#F9F3ED;color:#323232;font:400 18px/1.5 "Barlow Semi Condensed","Roboto Condensed",sans-serif}
-main{padding:24px;display:grid;gap:28px}h1{margin:0;font:700 96px/1 inherit;color:#559479}section{display:grid;gap:4px}
+main{padding:24px;display:grid;gap:28px}h1{margin:0;font-size:96px;line-height:1;font-weight:700;color:#37604F}section{display:grid;gap:4px}
 h2{margin:0;font-size:28px;text-transform:uppercase}a{color:#37604F;font-weight:600}a:focus-visible{outline:3px solid #323232;outline-offset:3px}
 @media (prefers-color-scheme:dark){body{background:#323232;color:#F9F3ED}h1,a{color:#F89D6A}a:focus-visible{outline-color:#F89D6A}}</style></head>
 <body><main><h1>404</h1>${LOCALES.map(({ code, path }) => `
@@ -149,7 +149,8 @@ console.log("✓ favicons");
 // Local server for printing the PDFs: loopback only, and confined to dist/.
 const TYPES = { ".html": "text/html; charset=utf-8", ".css": "text/css", ".woff2": "font/woff2", ".svg": "image/svg+xml", ".png": "image/png", ".pdf": "application/pdf" };
 const server = createServer(async (req, res) => {
-  let p = decodeURIComponent(new URL(req.url, "http://x").pathname);
+  let p;
+  try { p = decodeURIComponent(new URL(req.url, "http://x").pathname); } catch { return res.writeHead(400).end(); }
   if (p.endsWith("/")) p += "index.html";
   const file = resolve(DIST, "." + p);
   if (!file.startsWith(DIST + sep)) return res.writeHead(403).end();
