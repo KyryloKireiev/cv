@@ -4,7 +4,7 @@ Personal CV site of a Python / Django software engineer working on Open edX.
 Single page, English and Ukrainian, with a downloadable PDF.
 
 > **Status:** in progress. The design is agreed
-> ([mockup](docs/design/mockup-v4.html)); the site itself is being built next.
+> ([mockup](docs/design/mockup-v5.html)); the site itself is being built next.
 
 ## Stack
 

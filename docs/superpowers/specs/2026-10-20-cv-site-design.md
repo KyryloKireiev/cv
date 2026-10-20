@@ -78,7 +78,8 @@ All of `CLAUDE.md` applies. In particular:
 | Theme switch | **Circle reveal** from the toggle button |
 | Motion | Lively: rotating words, waveform, count-ups, cable plug-in, signal pulse, scroll reveals |
 
-The approved visual reference is [`docs/design/mockup-v4.html`](../../design/mockup-v4.html).
+The approved visual reference is [`docs/design/mockup-v5.html`](../../design/mockup-v5.html)
+(v4 plus cases 03–05, Circle theme switch, contrast and wording fixes).
 It is throwaway code (CDN fonts and icons, inline everything): match its look and behaviour,
 not its code.
 
@@ -161,10 +162,22 @@ reviewer checks every claim against facts.md.
   teammate's pull requests."
 - **Skills "where used" for Odoo:** "Exam platform task bank: 67 merge requests on custom
   Odoo add-ons."
-- **03 AI tooling, 04 Adaptive learning, 05 Gamification** — not yet written. The
-  builder drafts them from facts.md in the same format; **Kyrylo approves the wording before
-  they are published.** Until approved they are excluded from the build by a content flag
-  (§6.3), and the tab bar shows only the approved cases.
+- **03 AI tooling, 04 Adaptive learning, 05 Gamification** — drafted in
+  [`docs/design/mockup-v5.html`](../../design/mockup-v5.html) from facts.md, each with its
+  own extra animation (§8 rows 14–16). Kyrylo reviews the wording; anything he doesn't
+  confirm is marked `status: draft` (§6.3) and left out of the build.
+  - **03 AI tooling** (Oct 2025 – Mar 2026, Raccoon Gang products). Modules: Studio
+    assistant, LLM layer (OpenAI · Gemini), AI grader, Knowledge base (RAG), MCP connector,
+    Qdrant (microlearning XBlock). Numbers: 6 tools, 2 model providers, 30+ MRs.
+    Highlighted box: the Studio plugin slots it relies on are upstream PR #2749 (in review).
+  - **04 Adaptive learning** (Sep 2023 – Dec 2025, one client, 26 months). Modules: Content
+    library, Studio tracking, Diagnostic test, Adaptive flow, File submission, Back office.
+    Numbers: ~100 MRs, 26 months, 4 custom XBlocks.
+  - **05 Gamification** (Dec 2024 – Jun 2025). Modules: LMS events, Celery, Gamification
+    service, MySQL, Leaderboard, Avatars API. Numbers: ~45 MRs, 7 months, 4 game mechanics.
+    Highlighted box: achievement processing rebuilt test-first (TDD).
+  - Their "Problem" lines are framing, not sourced claims; keep them short and neutral.
+  - Approximate counts use a `~` or `+` prefix/suffix from content, and the count-up keeps it.
 
 ### 5.5 Skills (deep-green band)
 Rows: Backend, Frontend, Platforms, Data, AI, Delivery. Each skill is a chip; white
@@ -263,6 +276,9 @@ the content is fully present in the HTML without JS.
 | 11 | Skill chip | click | chip lifts and fills peach; "where used" panel updates (aria-live) |
 | 12 | Theme switch | toggle | **circle reveal** from the toggle centre to the far corner, ~1.2 s, View Transitions API; icon rotates; instant fallback where unsupported |
 | 13 | Hovers | hover | nav underline, link arrow nudge, tag lift, card lift |
+| 14 | Streaming readout (all racks; signature of 03) | module click | readout text appears word by word (~45 ms/word) like a model reply; full text instantly under reduced motion |
+| 15 | Learner path (04) | module click | 4-step path (Diagnostic → Personal path → Practice → Submit); a peach marker slides to the clicked module's step and earlier steps fill |
+| 16 | Live leaderboard (05) | click on LMS events, Gamification service or Leaderboard | "You" gains +40 points with a floating "+40", bars resize, rows reorder with a FLIP animation; marked as an illustrative example, not real data |
 
 Accessibility of interactive parts: rack modules are buttons with `aria-pressed`; cables
 are decorative (`aria-hidden`), the card holds the same facts as text; tabs follow the
@@ -330,15 +346,15 @@ Tests that must exist:
 ## 13. Out of scope for this build
 
 Hosting and deployment (next step: Cloudflare Pages via GitHub Actions is the researched
-default), custom domain, a real illustration, case studies 03–05 going live (needs
-Kyrylo's approval), more languages.
+default), custom domain, a real illustration, more languages.
 
 ## 14. My calls (Claude), for Kyrylo to check
 
 - No UI framework at all (vanilla TS), even though React is in the stack: smallest JS, best
   Lighthouse, nothing to hydrate.
 - Dark theme swaps the green accent for peach (RG rule: green text only on light).
-- Cases 03–05 are hidden until approved rather than shown as "coming soon".
+- Unconfirmed case wording is hidden rather than shown as "coming soon".
+- The leaderboard in case 05 uses made-up example learners, labelled as illustrative.
 - The PDF lists all 10 work areas, while the page shows 4 + "Show all".
 - The Cyrillic name line from mockup v2 is dropped (spelling unconfirmed).
 - Tech tags use JetBrains Mono, which the RG system reserves for code; tech names are

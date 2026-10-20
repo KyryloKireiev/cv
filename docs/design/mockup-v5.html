@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Patch Bay v4 · RG colours</title>
+<title>Patch Bay v5 · all case studies</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600;700&family=Barlow:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -220,6 +220,37 @@ svg.cables circle { fill: var(--rg-cream); }
 .nums b { display: block; font: 700 40px/1 var(--font-web); color: var(--accent-lg); font-variant-numeric: tabular-nums; }
 .nums span { font-size: 15px; color: var(--muted); }
 .stack { font: 400 13px var(--font-code); color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+/* contrast fix: no small text on graphite-600 */
+.area { background: var(--rg-graphite-800); box-shadow: inset 0 0 0 1px rgba(249,243,237,.16); }
+.area:hover { background: var(--rg-graphite-800); box-shadow: inset 0 0 0 1px var(--rg-peach); }
+.mod { background: var(--rg-graphite-800); }
+:root[data-theme="dark"] { --surface: var(--rg-graphite-800); }
+:root[data-theme="dark"] .card, :root[data-theme="dark"] .metric { box-shadow: inset 0 0 0 1px rgba(249,243,237,.16); }
+:root[data-theme="dark"] .band.dark { background: var(--rg-graphite-800); }
+:root[data-theme="dark"] .band.dark .area { background: var(--rg-graphite); }
+
+/* 04 learner path */
+.path { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 26px 0 4px; }
+.path::before { content: ""; position: absolute; left: 12%; right: 12%; top: 11px; height: 2px; background: var(--line); }
+.path .step { position: relative; text-align: center; font: 600 13px var(--font-web); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); transition: color .3s; }
+.path .step::before { content: ""; position: absolute; left: 50%; top: -20px; width: 10px; height: 10px; margin-left: -5px; background: var(--surface); box-shadow: inset 0 0 0 2px var(--muted); transition: background .3s, box-shadow .3s; }
+.path .step.done { color: var(--fg); }
+.path .step.done::before { background: var(--accent); box-shadow: none; }
+.path .dot { position: absolute; top: 6px; left: 12.5%; width: 14px; height: 14px; margin-left: -7px; background: var(--rg-peach); transition: left .6s cubic-bezier(.65,0,.35,1); }
+
+/* 05 leaderboard */
+.board { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; position: relative; }
+.board li { display: grid; grid-template-columns: 28px 90px 1fr 48px; gap: 10px; align-items: center; font-size: 15px; }
+.board .av { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 700 13px var(--font-web); background: var(--rg-cream-200); color: var(--rg-graphite); }
+.board .you .av { background: var(--rg-peach); }
+.board .you .nm { font-weight: 700; }
+.board .bar { height: 8px; background: var(--line); }
+.board .bar i { display: block; height: 100%; width: var(--w, 50%); background: var(--rg-green-700); transition: width .6s; }
+.board .you .bar i { background: var(--rg-peach); }
+.board b { font: 700 18px var(--font-web); text-align: right; font-variant-numeric: tabular-nums; }
+.plus { position: absolute; right: 0; font: 700 16px var(--font-web); color: var(--accent); pointer-events: none; animation: plus .9s ease-out forwards; }
+@keyframes plus { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-28px); } }
+
 .soon { color: var(--muted); padding: 48px; text-align: center; box-shadow: inset 0 0 0 1px var(--line); }
 
 /* skills on deep green */
@@ -262,12 +293,12 @@ footer { background: var(--rg-graphite); color: var(--rg-muted-on-dark); padding
 </head>
 <body>
 
-<div class="note">Mockup v4 · Raccoon Gang colours &amp; type + animations. Scroll slowly, click the rack modules, the skill chips, "Show all", EN/UK and the theme button.
+<div class="note">Mockup v5 · tabs 03–05 filled (AI tooling: streaming text · Adaptive learning: learner path · Gamification: live leaderboard). Theme effect = Circle. Contrast and wording fixes from the spec.
   <span class="options"><span class="option" data-choice="v4-good" onclick="toggleSelect(this)">Approve</span><span class="option" data-choice="v4-close" onclick="toggleSelect(this)">Close, needs changes</span></span>
   <span class="fxpick" role="group" aria-label="Theme switch effect">Theme effect:
-    <button type="button" data-fx="wave" aria-pressed="true">Wave flood</button>
+    <button type="button" data-fx="wave" aria-pressed="false">Wave flood</button>
     <button type="button" data-fx="crt" aria-pressed="false">TV switch-off</button>
-    <button type="button" data-fx="circle" aria-pressed="false">Circle</button>
+    <button type="button" data-fx="circle" aria-pressed="true">Circle</button>
   </span>
   <span class="options" style="margin-left:8px"><span class="option" data-choice="fx-wave" onclick="toggleSelect(this)">Pick wave</span><span class="option" data-choice="fx-crt" onclick="toggleSelect(this)">Pick TV</span><span class="option" data-choice="fx-circle" onclick="toggleSelect(this)">Pick circle</span></span>
 </div>
@@ -371,7 +402,7 @@ footer { background: var(--rg-graphite); color: var(--rg-muted-on-dark); padding
               <svg class="cables" aria-hidden="true"></svg>
               <button class="mod" type="button" data-id="sso" data-text="Sign-in: national digital-ID SSO, password and candidate-code login."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>Digital-ID SSO</b><small>auth</small></button>
               <button class="mod" type="button" data-id="exam" data-text="Exam service: session lifecycle, extra time, recovery after re-auth, audit log, results and commission grading."><span class="led"></span><div class="jacks"><span class="jack"></span><span class="jack"></span></div><b>Exam service</b><small>Django 5.2 · Datastar · SSE</small></button>
-              <button class="mod" type="button" data-id="bank" data-text="Task bank on Odoo 18: review flow, archive/restore, order templates, document signing, OLX export."><span class="led"></span><div class="jacks"><span class="jack"></span><span class="jack"></span></div><b>Task bank</b><small>Odoo 18 · 24 add-ons</small></button>
+              <button class="mod" type="button" data-id="bank" data-text="Task bank on Odoo 18: review flow, archive/restore, order templates, document signing, OLX export."><span class="led"></span><div class="jacks"><span class="jack"></span><span class="jack"></span></div><b>Task bank</b><small>Odoo 18 · custom add-ons</small></button>
               <button class="mod" type="button" data-id="db" data-text="PostgreSQL only: data plus background jobs via Procrastinate (LISTEN/NOTIFY). No Redis."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>PostgreSQL</b><small>data · jobs</small></button>
             </div>
             <div class="readout" aria-live="polite"><span class="p">›</span> exam ⇄ bank: JWT-signed API, async bundle exchange, results transfer <span class="cur"></span></div>
@@ -383,7 +414,7 @@ footer { background: var(--rg-graphite); color: var(--rg-muted-on-dark); padding
             <dl class="kv"><dt>Role</dt><dd>Software engineer, features on both services</dd><dt>Team</dt><dd>Several engineers</dd></dl>
             <div><div class="lbl">Problem</div>Questions written and reviewed in one system; exams taken securely in another.</div>
             <div><div class="lbl">What I did</div><ul><li>Exam sessions end to end: start, extra time, recovery, grading</li><li>Task bank features in Odoo: review, archive, signing</li><li>Much of the JWT integration between the two</li></ul></div>
-            <div class="hard"><div class="lbl">Hardest bug</div>A browser freeze in the live exam UI, traced to how Datastar morphs the page over SSE and fixed at the root.</div>
+            <div class="hard"><div class="lbl">Hardest bug</div>A browser freeze in the live exam UI: two DOM observers, a Datastar binding and a web component, fighting over one attribute. Found the root cause, moved the binding, added a regression test.</div>
             <div class="nums"><div><b data-count="127">127</b><span>merge requests</span></div><div><b data-count="123">123</b><span>merged</span></div><div><b data-count="8">8</b><span>months</span></div></div>
             <div class="stack">Python 3.12 · Django 5.2 · Datastar · Odoo 18 · PostgreSQL · Procrastinate · pytest · GitLab CI</div>
           </article>
@@ -394,14 +425,15 @@ footer { background: var(--rg-graphite); color: var(--rg-muted-on-dark); padding
         <div class="case">
           <div class="rack">
             <div class="rhead"><span>02 / 05 · upstream</span><span>6 merged · 1 open</span></div>
-            <div class="bay" data-links="m1-m2,m2-m3,m3-m4,m5-m6">
+            <div class="bay" data-links="m1-m2,m2-m3,m3-m4,m5-m6,m6-m7">
               <svg class="cables" aria-hidden="true"></svg>
               <button class="mod" type="button" data-id="m1" data-text="#34848 Mobile API: course progress + primary courses on the dashboard. Merged Jul 2024."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>#34848</b><small>mobile API · progress</small></button>
               <button class="mod" type="button" data-id="m2" data-text="#34859 Enrolments status API with a 30-day activity rule and a query limit. Merged Nov 2024."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>#34859</b><small>enrolments status</small></button>
               <button class="mod" type="button" data-id="m3" data-text="#36969 Fixed a 500 in the blocks API: a helper returned a dict instead of a list. Merged Sep 2025."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>#36969</b><small>500 fix</small></button>
               <button class="mod" type="button" data-id="m4" data-text="#36970 Short assignment labels in the Course Info blocks API. Merged Sep 2025."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>#36970</b><small>assignment labels</small></button>
-              <button class="mod" type="button" data-id="m5" data-text="edx-enterprise #2488: removed the pinned openai dependency. Merged Dec 2025."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>enterprise #2488</b><small>dependency removal</small></button>
-              <button class="mod" type="button" data-id="m6" data-text="frontend-app-authoring #2749: plugin slots for HTML and Problem editors. In review."><span class="led amber"></span><div class="jacks"><span class="jack"></span></div><b>authoring #2749</b><small>plugin slots · open</small></button>
+              <button class="mod" type="button" data-id="m5" data-text="cookie-policy-banner #445: migrated the tests from Enzyme to React Testing Library. Merged Sep 2024."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>banner #445</b><small>Enzyme → RTL</small></button>
+              <button class="mod" type="button" data-id="m6" data-text="edx-enterprise #2488: removed the pinned openai dependency. Merged Dec 2025."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>enterprise #2488</b><small>dependency removal</small></button>
+              <button class="mod" type="button" data-id="m7" data-text="frontend-app-authoring #2749: plugin slots for HTML and Problem editors. In review."><span class="led amber"></span><div class="jacks"><span class="jack"></span></div><b>authoring #2749</b><small>plugin slots · open</small></button>
             </div>
             <div class="readout" aria-live="polite"><span class="p">›</span> green = merged · peach = in review <span class="cur"></span></div>
           </div>
@@ -415,9 +447,101 @@ footer { background: var(--rg-graphite); color: var(--rg-muted-on-dark); padding
           </article>
         </div>
       </div>
-      <div class="panel" id="p3" hidden><div class="soon">03 AI tooling · same format: rack (LLM ↔ Qdrant ↔ Studio ↔ Tutor) + card</div></div>
-      <div class="panel" id="p4" hidden><div class="soon">04 Adaptive learning · ~100 MRs over 26 months · same format</div></div>
-      <div class="panel" id="p5" hidden><div class="soon">05 Gamification backend · same format</div></div>
+      <div class="panel" id="p3" hidden>
+        <div class="case">
+          <div class="rack">
+            <div class="rhead"><span>03 / 05 · ai tooling</span><span>6 tools</span></div>
+            <div class="bay" data-links="studio-llm,grader-llm,llm-kb,qdrant-llm,mcp-studio">
+              <svg class="cables" aria-hidden="true"></svg>
+              <button class="mod" type="button" data-id="studio" data-text="Content assistant inside Studio's editors, plugged in through editor plugin slots (proposed upstream as #2749)."><span class="led"></span><div class="jacks"><span class="jack"></span><span class="jack"></span></div><b>Studio assistant</b><small>React · plugin slots</small></button>
+              <button class="mod" type="button" data-id="llm" data-text="OpenAI and Gemini support, with structured answers validated by Pydantic schemas."><span class="led"></span><div class="jacks"><span class="jack"></span><span class="jack"></span></div><b>LLM layer</b><small>OpenAI · Gemini</small></button>
+              <button class="mod" type="button" data-id="grader" data-text="AI grader for open-response assessments: scores and feedback returned as structured data and saved for review."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>AI grader</b><small>open responses · Pydantic</small></button>
+              <button class="mod" type="button" data-id="kb" data-text="Course knowledge base: documents and YouTube transcripts split into chunks and retrieved before the model answers (RAG)."><span class="led"></span><div class="jacks"><span class="jack"></span><span class="jack"></span></div><b>Knowledge base</b><small>RAG · chunking</small></button>
+              <button class="mod" type="button" data-id="mcp" data-text="MCP connector to Open edX, so an AI assistant can create XBlocks in a course."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>MCP connector</b><small>Open edX ↔ assistants</small></button>
+              <button class="mod" type="button" data-id="qdrant" data-text="Qdrant vector store used by the AI microlearning XBlock."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>Qdrant</b><small>microlearning XBlock</small></button>
+            </div>
+            <div class="readout" aria-live="polite"><span class="p">›</span> click a module: answers stream in like a model reply <span class="cur"></span></div>
+          </div>
+          <article class="card">
+            <div class="top"><span class="pill">R&amp;D</span>Oct 2025 – Mar 2026</div>
+            <h3>AI tooling for Open edX</h3>
+            <div class="ctx">Raccoon Gang products · shipped as Open edX and Tutor plugins</div>
+            <dl class="kv"><dt>Role</dt><dd>Software engineer across the tools</dd></dl>
+            <div><div class="lbl">Problem</div>Bring language models into the places course teams already work: grading, authoring, search.</div>
+            <div><div class="lbl">What I did</div><ul><li>AI grader for open-response assessments (OpenAI, Gemini)</li><li>Course knowledge base (RAG) and a microlearning XBlock on Qdrant</li><li>Studio content assistant and an MCP connector to Open edX</li></ul></div>
+            <div class="hard"><div class="lbl">Upstream</div>The Studio editor plugin slots the assistant relies on are proposed to Open edX as #2749, now in review.</div>
+            <div class="nums"><div><b data-count="6">6</b><span>tools</span></div><div><b data-count="2">2</b><span>model providers</span></div><div><b data-count="30" data-suffix="+">30+</b><span>merge requests</span></div></div>
+            <div class="stack">Python · Django · Pydantic · OpenAI · Gemini · Qdrant · MCP · React · Tutor</div>
+          </article>
+        </div>
+      </div>
+
+      <div class="panel" id="p4" hidden>
+        <div class="case">
+          <div class="rack">
+            <div class="rhead"><span>04 / 05 · adaptive learning</span><span>26 months</span></div>
+            <div class="bay" data-links="lib-studio,studio-diag,diag-flow,flow-upload,upload-office">
+              <svg class="cables" aria-hidden="true"></svg>
+              <button class="mod" type="button" data-id="lib" data-step="0" data-text="Content libraries: reusable components that authors pull into many courses."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>Content library</b><small>reusable blocks</small></button>
+              <button class="mod" type="button" data-id="studio" data-step="0" data-text="Studio shows where every library component is used, with sync, delete handling and a status column."><span class="led"></span><div class="jacks"><span class="jack"></span><span class="jack"></span></div><b>Studio tracking</b><small>locations · sync · status</small></button>
+              <button class="mod" type="button" data-id="diag" data-step="1" data-text="Diagnostic-test XBlock that feeds the adaptive flow."><span class="led"></span><div class="jacks"><span class="jack"></span><span class="jack"></span></div><b>Diagnostic test</b><small>custom XBlock</small></button>
+              <button class="mod" type="button" data-id="flow" data-step="2" data-text="Adaptive flow with progression rules: what unlocks next, based on results."><span class="led"></span><div class="jacks"><span class="jack"></span><span class="jack"></span></div><b>Adaptive flow</b><small>progression rules · MFE</small></button>
+              <button class="mod" type="button" data-id="upload" data-step="3" data-text="File-submission XBlock: learners upload work (up to 250 MB) that is sent on for review."><span class="led"></span><div class="jacks"><span class="jack"></span><span class="jack"></span></div><b>File submission</b><small>custom XBlock</small></button>
+              <button class="mod" type="button" data-id="office" data-step="3" data-text="Back-office integration that receives submitted files for assessment."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>Back office</b><small>integration</small></button>
+            </div>
+            <div class="readout" aria-live="polite"><span class="p">›</span> click a module to move the learner along the path <span class="cur"></span></div>
+          </div>
+          <article class="card">
+            <div class="top"><span class="pill">Long-running</span>Sep 2023 – Dec 2025</div>
+            <h3>Adaptive learning</h3>
+            <div class="ctx">Adaptive e-learning platform on Open edX · one client, 26 months</div>
+            <dl class="kv"><dt>Role</dt><dd>Software engineer, plugins and XBlocks</dd></dl>
+            <div><div class="lbl">Problem</div>Authors reuse library content across courses but couldn't see where it was used; learners needed a path that adapts to them.</div>
+            <div class="path" aria-label="Learner path">
+              <span class="step">Diagnostic</span><span class="step">Personal path</span><span class="step">Practice</span><span class="step">Submit</span>
+              <i class="dot" aria-hidden="true"></i>
+            </div>
+            <div><div class="lbl">What I did</div><ul><li>Library-reuse tracking in Studio: locations, sync, status</li><li>Diagnostic-test XBlock and progression rules</li><li>File-submission XBlock wired to a back office</li></ul></div>
+            <div class="nums"><div><b data-count="100" data-prefix="~">~100</b><span>merge requests</span></div><div><b data-count="26">26</b><span>months</span></div><div><b data-count="4">4</b><span>custom XBlocks</span></div></div>
+            <div class="stack">Python · Django · XBlocks · Open edX Studio · React MFE · Tutor</div>
+          </article>
+        </div>
+      </div>
+
+      <div class="panel" id="p5" hidden>
+        <div class="case">
+          <div class="rack">
+            <div class="rhead"><span>05 / 05 · gamification</span><span>7 months</span></div>
+            <div class="bay" data-links="lms-celery,celery-game,game-db,game-board,avatars-board">
+              <svg class="cables" aria-hidden="true"></svg>
+              <button class="mod" type="button" data-id="lms" data-score="1" data-text="Learner activity in Open edX is turned into internal events."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>LMS events</b><small>Open edX</small></button>
+              <button class="mod" type="button" data-id="celery" data-text="Celery workers post the events to the gamification service in the background."><span class="led"></span><div class="jacks"><span class="jack"></span><span class="jack"></span></div><b>Celery</b><small>async posting</small></button>
+              <button class="mod" type="button" data-id="game" data-score="1" data-text="Points, badges and achievements; achievement processing rebuilt test-first."><span class="led"></span><div class="jacks"><span class="jack"></span><span class="jack"></span></div><b>Gamification service</b><small>points · badges · achievements</small></button>
+              <button class="mod" type="button" data-id="db" data-text="Points and charts read from MySQL for the learner dashboard."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>MySQL</b><small>points · charts</small></button>
+              <button class="mod" type="button" data-id="board" data-score="1" data-text="Leaderboard tab in the learner dashboard."><span class="led"></span><div class="jacks"><span class="jack"></span><span class="jack"></span></div><b>Leaderboard</b><small>dashboard tab</small></button>
+              <button class="mod" type="button" data-id="avatars" data-text="Avatar sets API: learners pick an avatar that shows next to their rank."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>Avatars API</b><small>DRF</small></button>
+            </div>
+            <div class="readout" aria-live="polite"><span class="p">›</span> click LMS events to score points <span class="cur"></span></div>
+          </div>
+          <article class="card">
+            <div class="top"><span class="pill">Backend</span>Dec 2024 – Jun 2025</div>
+            <h3>Gamification</h3>
+            <div class="ctx">Gamified learning on Open edX · learner dashboard</div>
+            <dl class="kv"><dt>Role</dt><dd>Software engineer, backend</dd></dl>
+            <div><div class="lbl">Problem</div>Learners needed visible progress: points, badges and a place on a leaderboard.</div>
+            <ol class="board" aria-label="Example leaderboard (illustrative)">
+              <li data-p="340"><span class="av">A</span><span class="nm">Learner A</span><span class="bar"><i></i></span><b>340</b></li>
+              <li data-p="310"><span class="av">B</span><span class="nm">Learner B</span><span class="bar"><i></i></span><b>310</b></li>
+              <li data-p="280"><span class="av">C</span><span class="nm">Learner C</span><span class="bar"><i></i></span><b>280</b></li>
+              <li data-p="250" class="you"><span class="av">Y</span><span class="nm">You</span><span class="bar"><i></i></span><b>250</b></li>
+            </ol>
+            <div><div class="lbl">What I did</div><ul><li>Event pipeline: Open edX → Celery → gamification service</li><li>Badges, achievements, points and charts</li><li>Leaderboard tab and avatar sets API</li></ul></div>
+            <div class="hard"><div class="lbl">Test-first</div>Achievement processing was rebuilt test-first (TDD).</div>
+            <div class="nums"><div><b data-count="45" data-prefix="~">~45</b><span>merge requests</span></div><div><b data-count="7">7</b><span>months</span></div><div><b data-count="4">4</b><span>game mechanics</span></div></div>
+            <div class="stack">Python · Django · DRF · Celery · MySQL · Open edX events</div>
+          </article>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -451,7 +575,7 @@ footer { background: var(--rg-graphite); color: var(--rg-muted-on-dark); padding
 
   // theme + language
   const root = document.documentElement, themeBtn = document.getElementById("theme");
-  let fx = "wave";
+  let fx = "circle";
   document.querySelectorAll("[data-fx]").forEach(b => b.addEventListener("click", () => {
     fx = b.dataset.fx;
     document.querySelectorAll("[data-fx]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
@@ -545,8 +669,8 @@ footer { background: var(--rg-graphite); color: var(--rg-muted-on-dark); padding
   // count-up when visible (HTML already holds the final number)
   function countUp(el) {
     if (reduce || el.dataset.done) return; el.dataset.done = 1;
-    const to = +el.dataset.count, t0 = performance.now(), dur = 1100;
-    (function step(t) { const k = Math.min(1, (t - t0) / dur); el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); })(t0);
+    const to = +el.dataset.count, t0 = performance.now(), dur = 1100, pre = el.dataset.prefix || "", suf = el.dataset.suffix || "";
+    (function step(t) { const k = Math.min(1, (t - t0) / dur); el.textContent = pre + Math.round(to * (1 - Math.pow(1 - k, 3))) + suf; if (k < 1) requestAnimationFrame(step); })(t0);
   }
 
   // reveal + count + rack power-on
@@ -592,13 +716,50 @@ footer { background: var(--rg-graphite); color: var(--rg-muted-on-dark); padding
       (function step(t) { const k = Math.min(1, (t - t0) / 700); const pt = p.getPointAtLength((fwd ? k : 1 - k) * L); c.setAttribute("cx", pt.x); c.setAttribute("cy", pt.y); if (k < 1) requestAnimationFrame(step); else c.remove(); })(t0);
     });
   }
+  // readout prints like a streaming model reply (word by word)
+  function type(out, text) {
+    clearInterval(out._t);
+    if (reduce) { out.innerHTML = '<span class="p">›</span> ' + text + ' <span class="cur"></span>'; return; }
+    const words = text.split(" "); let i = 0;
+    out.innerHTML = '<span class="p">›</span> <span class="tx"></span> <span class="cur"></span>';
+    const tx = out.querySelector(".tx");
+    out._t = setInterval(() => { tx.textContent += (i ? " " : "") + words[i++]; if (i >= words.length) clearInterval(out._t); }, 45);
+  }
+
+  // 04: learner path follows the clicked module's step
+  function moveDot(panel, step) {
+    const path = panel.querySelector(".path"); if (!path) return;
+    path.querySelectorAll(".step").forEach((s, i) => s.classList.toggle("done", i <= step));
+    path.querySelector(".dot").style.left = (12.5 + step * 25) + "%";
+  }
+
+  // 05: leaderboard scores and reorders (FLIP)
+  function paintBoard(board) {
+    const rows = [...board.querySelectorAll(":scope > li")];
+    const max = Math.max(...rows.map(li => +li.dataset.p));
+    rows.forEach(li => { li.querySelector(".bar i").style.setProperty("--w", (li.dataset.p / max * 100) + "%"); li.querySelector("b").textContent = li.dataset.p; });
+  }
+  function score(board) {
+    const you = board.querySelector(".you"), first = new Map([...board.children].map(li => [li, li.getBoundingClientRect().top]));
+    you.dataset.p = +you.dataset.p + 40;
+    const plus = document.createElement("span"); plus.className = "plus"; plus.textContent = "+40";
+    plus.style.top = you.offsetTop + "px"; board.appendChild(plus); setTimeout(() => plus.remove(), 900);
+    [...board.children].filter(li => li.tagName === "LI").sort((a, b) => b.dataset.p - a.dataset.p).forEach(li => board.insertBefore(li, plus));
+    paintBoard(board);
+    if (reduce) return;
+    first.forEach((top, li) => { const d = top - li.getBoundingClientRect().top; if (d) li.animate([{ transform: `translateY(${d}px)` }, { transform: "none" }], { duration: 500, easing: "cubic-bezier(.65,0,.35,1)" }); });
+  }
+  document.querySelectorAll(".board").forEach(paintBoard);
+
   const bays = document.querySelectorAll(".bay");
   bays.forEach(bay => {
-    const out = bay.parentElement.querySelector(".readout");
+    const out = bay.parentElement.querySelector(".readout"), panel = bay.closest(".panel");
     bay.querySelectorAll(".mod").forEach(m => m.addEventListener("click", () => {
       bay.querySelectorAll(".mod").forEach(x => x.classList.toggle("on", x === m));
-      out.innerHTML = '<span class="p">›</span> ' + m.dataset.text + ' <span class="cur"></span>';
+      type(out, m.dataset.text);
       draw(bay, m.dataset.id); pulse(bay, m.dataset.id);
+      if (m.dataset.step) moveDot(panel, +m.dataset.step);
+      if (m.dataset.score) score(panel.querySelector(".board"));
     }));
   });
   addEventListener("resize", () => bays.forEach(b => draw(b)));
