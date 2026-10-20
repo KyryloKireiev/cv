@@ -28,3 +28,6 @@ CLAUDE.local.md
 .DS_Store
 .env
 .env.*
+
+# Brainstorm mockups (local only)
+.superpowers/

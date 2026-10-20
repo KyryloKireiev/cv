@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en" class="js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patch Bay v4 · RG colours</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600;700&family=Barlow:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<script src="https://unpkg.com/lucide@1.48.0/dist/umd/lucide.min.js"></script>
+<style>
+/* Raccoon Gang design-system tokens (colours, type, shape) — personal CV, no RG logo */
+:root {
+  --rg-graphite: #323232; --rg-cream: #F9F3ED; --rg-green: #559479;
+  --rg-green-700: #37604F; --rg-green-900: #20322A; --rg-peach: #F89D6A; --rg-peach-300: #FFB992; --rg-white: #FFFFFF;
+  --rg-graphite-800: #2A2A2A; --rg-graphite-600: #4A4A4A; --rg-cream-200: #EDE7E1;
+  --rg-muted-on-light: #6B6560; --rg-muted-on-dark: #B8B2AC; --rg-peach-600: #E08A58;
+
+  --bg: var(--rg-cream); --surface: var(--rg-white); --fg: var(--rg-graphite); --muted: var(--rg-muted-on-light);
+  --line: var(--rg-cream-200); --accent-lg: var(--rg-green); --accent: var(--rg-green-700);
+
+  --font-web: "Barlow Semi Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
+  --font-button: "Barlow", "Barlow Semi Condensed", Arial, sans-serif;
+  --font-code: "JetBrains Mono", ui-monospace, monospace;
+  --clip: polygon(24px 0, 100% 0, 100% 100%, 0 100%, 0 24px);
+  --clip-sm: polygon(12px 0, 100% 0, 100% 100%, 0 100%, 0 12px);
+}
+:root[data-theme="dark"] {
+  --bg: var(--rg-graphite); --surface: var(--rg-graphite-600); --fg: var(--rg-cream); --muted: var(--rg-muted-on-dark);
+  --line: rgba(249, 243, 237, .16); --accent-lg: var(--rg-peach); --accent: var(--rg-peach);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 400 18px/1.55 var(--font-web); }
+/* theme switch: View Transitions, animated from JS */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+html.fx-crt::view-transition-group(root) { background: #0c0c0c; }
+html.fx-crt::view-transition-old(root) { z-index: 2; }
+#theme svg { transition: transform 1s cubic-bezier(.65,0,.35,1); }
+:root[data-theme="dark"] #theme svg { transform: rotate(180deg); }
+.fxpick { display: inline-flex; gap: 4px; margin-left: 16px; }
+.fxpick button { font: 600 12px var(--font-button); background: transparent; color: #ddd; border: 1px solid #666; padding: 3px 9px; cursor: pointer; }
+.fxpick button[aria-pressed="true"] { background: var(--rg-peach); color: var(--rg-graphite); border-color: var(--rg-peach); }
+a { color: inherit; }
+:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.eyebrow { font: 600 14px/1.2 var(--font-web); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+i[data-lucide], svg.lucide { width: 20px; height: 20px; stroke-width: 2; vertical-align: -4px; }
+
+.note { background: #111; color: #ddd; font: 13px var(--font-button); padding: 8px 24px; }
+.note .options { display: inline-flex; gap: 6px; margin-left: 12px; }
+.note .option { cursor: pointer; border: 1px dashed #777; padding: 3px 9px; }
+.note .option.selected { background: var(--rg-peach); color: var(--rg-graphite); border-style: solid; }
+
+/* buttons per DS */
+.btn { font: 600 16px/1 var(--font-button); letter-spacing: .01em; height: 40px; padding: 0 24px; display: inline-flex; align-items: center; gap: 8px; border: 0; cursor: pointer; text-decoration: none; transition: background .15s, color .15s, transform .1s; }
+.btn:active { transform: translateY(1px); }
+.btn-green { background: var(--rg-green-700); color: var(--rg-white); }
+.btn-green:hover { background: var(--rg-green-900); }
+.btn-peach { background: var(--rg-peach); color: var(--rg-graphite); }
+.btn-peach:hover { background: var(--rg-peach-600); }
+.btn-outline { background: transparent; color: var(--fg); box-shadow: inset 0 0 0 1px var(--fg); }
+.btn-outline:hover { background: var(--fg); color: var(--bg); }
+.btn-sm { height: 32px; padding: 0 16px; font-size: 14px; }
+:root[data-theme="dark"] .btn-green { background: var(--rg-peach); color: var(--rg-graphite); }
+:root[data-theme="dark"] .btn-green:hover { background: var(--rg-peach-600); }
+
+/* header */
+header.nav { position: sticky; top: 0; z-index: 30; background: var(--bg); border-bottom: 1px solid var(--line); }
+header.nav .wrap { display: flex; align-items: center; gap: 24px; height: 64px; }
+.brand { font: 700 20px var(--font-web); text-decoration: none; display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: .02em; }
+.brand .sq { width: 12px; height: 12px; background: var(--rg-green); animation: pulse 2.4s ease-in-out infinite; }
+@keyframes pulse { 50% { background: var(--rg-peach); } }
+nav.links { margin-left: auto; display: flex; gap: 24px; font: 500 16px var(--font-web); }
+nav.links a { text-decoration: none; position: relative; padding: 4px 0; }
+nav.links a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: 0; height: 2px; background: var(--rg-peach); transition: right .25s; }
+nav.links a:hover::after, nav.links a.cur::after { right: 0; }
+.tools { display: flex; gap: 8px; align-items: center; }
+.seg { display: inline-flex; box-shadow: inset 0 0 0 1px var(--line); }
+.seg button { font: 600 14px var(--font-button); background: transparent; color: var(--muted); border: 0; height: 32px; padding: 0 10px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.icon-btn { width: 40px; height: 40px; display: grid; place-items: center; background: transparent; border: 0; color: var(--fg); cursor: pointer; }
+
+/* hero */
+.hero { position: relative; padding: 72px 0 0; overflow: hidden; }
+.hero-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 64px; align-items: start; }
+h1 { margin: 12px 0 0; font: 700 clamp(56px, 8.4vw, 112px)/.92 var(--font-web); text-transform: uppercase; letter-spacing: -.01em; }
+h1 .acc { color: var(--accent-lg); }
+.rotor { font: 600 clamp(24px, 2.6vw, 32px)/1.2 var(--font-web); margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+.rotor .slot { position: relative; display: inline-block; height: 1.2em; overflow: hidden; color: var(--accent-lg); min-width: 12ch; }
+.rotor .slot span { display: block; }
+.rotor .slot span.out { animation: out .45s forwards; }
+.rotor .slot span.in { animation: in .45s forwards; }
+@keyframes out { to { transform: translateY(-110%); opacity: 0; } }
+@keyframes in { from { transform: translateY(110%); opacity: 0; } to { transform: none; opacity: 1; } }
+.summary { max-width: 34em; margin: 16px 0 0; color: var(--muted); }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+.tag { font: 500 14px var(--font-code); height: 32px; padding: 0 12px; display: inline-flex; align-items: center; background: var(--rg-peach-300); color: var(--rg-graphite); transition: background .15s, transform .15s; cursor: default; }
+.tag:hover { background: var(--rg-peach); transform: translateY(-2px); }
+.tag.fe { background: transparent; box-shadow: inset 0 0 0 2px var(--rg-green); color: var(--fg); }
+.contact { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center; margin-top: 28px; }
+.mail { display: inline-flex; }
+.mail .btn + .btn { box-shadow: inset 1px 0 0 rgba(255,255,255,.3); padding: 0 12px; }
+.out { text-decoration: none; font: 500 16px var(--font-web); display: inline-flex; gap: 4px; align-items: center; }
+.out:hover { color: var(--accent); }
+.out svg { width: 16px; height: 16px; transition: transform .2s; }
+.out:hover svg { transform: translate(2px, -2px); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 40px; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--line); }
+.meta dt { font: 600 12px var(--font-web); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.meta dd { margin: 2px 0 0; font-weight: 600; }
+
+.metrics { display: grid; gap: 16px; }
+.metric { background: var(--surface); clip-path: var(--clip); padding: 24px 24px 20px 32px; position: relative; }
+.metric b { display: block; font: 700 clamp(48px, 5vw, 72px)/1 var(--font-web); color: var(--accent-lg); font-variant-numeric: tabular-nums; }
+.metric span { color: var(--muted); font-size: 16px; }
+.metric .live { position: absolute; top: 20px; right: 20px; width: 10px; height: 10px; background: var(--rg-green); }
+.metric .live.on { animation: led 1.2s steps(2) 3; }
+@keyframes led { 50% { background: var(--rg-peach); } }
+
+.wave { display: block; width: 100%; height: 72px; margin-top: 56px; }
+.wave .track { animation: flow 9s linear infinite; }
+@keyframes flow { to { transform: translateX(-2400px); } }
+.wave path { fill: none; stroke-width: 2; }
+
+/* bands */
+.band { padding: 96px 0; }
+.band.dark { background: var(--rg-graphite); color: var(--rg-cream); }
+:root[data-theme="dark"] .band.dark { background: var(--rg-graphite-800); }
+.band.deep { background: var(--rg-green-900); color: var(--rg-white); }
+.band.green { background: var(--rg-green); color: var(--rg-white); padding: 72px 0; }
+.sec-head { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: end; margin-bottom: 48px; }
+h2 { margin: 6px 0 0; font: 700 clamp(36px, 4.2vw, 56px)/1.05 var(--font-web); text-transform: uppercase; }
+.band.dark h2 .acc { color: var(--rg-peach); }
+h2 .acc { color: var(--accent-lg); }
+.sec-head p { margin: 0; }
+.band.dark .eyebrow, .band.dark .muted { color: var(--rg-muted-on-dark); }
+.band.dark .sec-head p { color: var(--rg-muted-on-dark); }
+
+/* experience */
+.timeline { position: relative; margin-left: 30%; padding-left: 40px; }
+.timeline .rail { position: absolute; left: 0; top: 6px; bottom: 0; width: 2px; background: rgba(249,243,237,.16); }
+.timeline .rail i { position: absolute; inset: 0 0 auto 0; height: 100%; background: var(--rg-peach); transform-origin: top; transform: scaleY(var(--p, 1)); }
+.job { position: relative; padding-bottom: 48px; }
+.job::before { content: ""; position: absolute; left: -46px; top: 8px; width: 14px; height: 14px; background: var(--rg-peach); }
+.job.dim::before { background: var(--rg-muted-on-dark); }
+.job .row { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; }
+.job b.co { font: 700 30px var(--font-web); text-transform: uppercase; }
+.job .when { font: 500 14px var(--font-code); color: var(--rg-muted-on-dark); white-space: nowrap; }
+.job .role { color: var(--rg-muted-on-dark); }
+.job ul { margin: 12px 0 0; padding-left: 20px; }
+.areas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+.area { background: var(--rg-graphite-600); clip-path: var(--clip-sm); padding: 18px 20px 18px 24px; display: grid; gap: 4px; align-content: start; transition: transform .2s, background .2s; }
+.area:hover { transform: translateY(-3px); background: #565656; }
+.area .yr { font: 500 13px var(--font-code); color: var(--rg-peach); }
+.area b { font: 700 20px/1.2 var(--font-web); }
+.area p { margin: 0; font-size: 16px; color: var(--rg-muted-on-dark); }
+.area.more { display: none; }
+.areas.all .area.more { display: grid; animation: rise .4s both; }
+.areas.all .area.more:nth-child(6) { animation-delay: .05s; } .areas.all .area.more:nth-child(7) { animation-delay: .1s; }
+.areas.all .area.more:nth-child(8) { animation-delay: .15s; } .areas.all .area.more:nth-child(9) { animation-delay: .2s; } .areas.all .area.more:nth-child(10) { animation-delay: .25s; }
+.mini { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.mini span { font: 500 12px var(--font-code); padding: 2px 8px; box-shadow: inset 0 0 0 1px rgba(249,243,237,.3); }
+.showall { margin-top: 20px; background: transparent; color: var(--rg-cream); box-shadow: inset 0 0 0 1px var(--rg-cream); }
+.showall:hover { background: var(--rg-cream); color: var(--rg-graphite); }
+
+/* work */
+.tabs { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1px solid var(--line); position: sticky; top: 64px; z-index: 5; background: var(--bg); }
+.tabs button { font: 600 17px var(--font-web); border: 0; background: transparent; color: var(--muted); padding: 14px 18px; cursor: pointer; position: relative; }
+.tabs button .n { font: 500 13px var(--font-code); margin-right: 8px; }
+.tabs button::after { content: ""; position: absolute; left: 18px; right: 18px; bottom: -1px; height: 3px; background: var(--rg-peach); transform: scaleX(0); transition: transform .25s; }
+.tabs button[aria-selected="true"] { color: var(--fg); }
+.tabs button[aria-selected="true"]::after { transform: scaleX(1); }
+.case { display: grid; grid-template-columns: 1.05fr 1fr; gap: 32px; margin-top: 32px; align-items: start; }
+.panel[hidden] { display: none; }
+.panel:not([hidden]) .case > * { animation: rise .45s both; }
+.panel:not([hidden]) .case > *:nth-child(2) { animation-delay: .08s; }
+@keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+
+.rack { background: var(--rg-graphite); color: var(--rg-cream); clip-path: var(--clip); padding: 24px 20px 20px; position: sticky; top: 140px; }
+.rack .rhead { display: flex; justify-content: space-between; font: 600 13px var(--font-web); letter-spacing: .08em; text-transform: uppercase; color: var(--rg-muted-on-dark); padding-left: 12px; }
+.bay { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+.mod { position: relative; text-align: left; background: var(--rg-graphite-600); border: 0; box-shadow: inset 0 0 0 1px rgba(249,243,237,.12); color: inherit; padding: 14px; min-height: 112px; cursor: pointer; font: inherit; transition: box-shadow .2s; }
+.mod:hover, .mod.on { box-shadow: inset 0 0 0 2px var(--rg-peach); }
+.jacks { display: flex; gap: 8px; margin-bottom: 10px; }
+.jack { width: 14px; height: 14px; border-radius: 50%; border: 3px solid var(--rg-muted-on-dark); background: var(--rg-graphite-800); transition: border-color .2s; }
+.mod.on .jack { border-color: var(--rg-peach); }
+.mod b { display: block; font: 700 19px/1.15 var(--font-web); }
+.mod small { display: block; margin-top: 4px; font: 400 12px var(--font-code); color: var(--rg-muted-on-dark); }
+.led { position: absolute; top: 14px; right: 14px; width: 8px; height: 8px; background: var(--rg-graphite-800); transition: background .2s; }
+.rack.lit .led { background: var(--rg-green); }
+.rack.lit .led.amber { background: var(--rg-peach); }
+.rack.lit .mod:nth-child(2) .led { transition-delay: .5s; } .rack.lit .mod:nth-child(3) .led { transition-delay: .7s; }
+.rack.lit .mod:nth-child(4) .led { transition-delay: .9s; } .rack.lit .mod:nth-child(5) .led { transition-delay: 1.1s; }
+.rack.lit .mod:nth-child(6) .led { transition-delay: 1.3s; } .rack.lit .mod:nth-child(7) .led { transition-delay: 1.5s; }
+svg.cables { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 3; }
+svg.cables path { fill: none; stroke: var(--rg-peach); stroke-width: 4; stroke-linecap: round; opacity: .55; transition: opacity .2s; }
+svg.cables path.hot { opacity: 1; }
+svg.cables path.plug { stroke-dasharray: var(--len); stroke-dashoffset: var(--len); animation: plug .9s ease forwards; }
+@keyframes plug { to { stroke-dashoffset: 0; } }
+svg.cables circle { fill: var(--rg-cream); }
+.readout { margin-top: 16px; padding: 12px 14px; background: var(--rg-graphite-800); font: 400 13px/1.5 var(--font-code); color: var(--rg-cream); min-height: 64px; }
+.readout .p { color: var(--rg-peach); }
+.readout .cur { display: inline-block; width: 8px; height: 14px; background: var(--rg-peach); vertical-align: -2px; animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+.card { background: var(--surface); clip-path: var(--clip); padding: 32px 28px 28px; display: grid; gap: 16px; }
+.card .top { display: flex; gap: 12px; align-items: center; font: 500 14px var(--font-code); color: var(--muted); }
+.pill { font: 600 13px var(--font-web); letter-spacing: .08em; text-transform: uppercase; background: var(--rg-peach-300); color: var(--rg-graphite); padding: 4px 10px; }
+.card h3 { margin: 0; font: 700 34px/1.1 var(--font-web); text-transform: uppercase; }
+.card .ctx { color: var(--muted); margin-top: -10px; }
+.kv { display: grid; grid-template-columns: 64px 1fr; gap: 2px 12px; font-size: 16px; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; }
+.lbl { font: 600 13px var(--font-web); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.card ul { margin: 4px 0 0; padding-left: 20px; }
+.card li { margin: 4px 0; }
+.hard { border-left: 3px solid var(--rg-peach); padding: 4px 0 4px 16px; }
+.hard .lbl { color: var(--fg); }
+.nums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; border-top: 1px solid var(--line); padding-top: 16px; }
+.nums b { display: block; font: 700 40px/1 var(--font-web); color: var(--accent-lg); font-variant-numeric: tabular-nums; }
+.nums span { font-size: 15px; color: var(--muted); }
+.stack { font: 400 13px var(--font-code); color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+.soon { color: var(--muted); padding: 48px; text-align: center; box-shadow: inset 0 0 0 1px var(--line); }
+
+/* skills on deep green */
+.band.deep .eyebrow, .band.deep .sec-head p { color: var(--rg-cream-200); }
+.band.deep h2 .acc { color: var(--rg-peach-300); }
+.sk { display: grid; grid-template-columns: 180px 1fr; gap: 16px; padding: 18px 0; border-top: 1px solid rgba(255,255,255,.16); align-items: start; }
+.sk .g { font: 700 22px var(--font-web); text-transform: uppercase; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font: 500 14px var(--font-code); height: 32px; padding: 0 12px; display: inline-flex; align-items: center; background: transparent; color: var(--rg-white); border: 0; box-shadow: inset 0 0 0 1px rgba(255,255,255,.4); cursor: pointer; transition: background .15s, color .15s, transform .15s; }
+.chip.core { background: var(--rg-white); color: var(--rg-green-900); box-shadow: none; }
+.chip:hover, .chip[aria-pressed="true"] { background: var(--rg-peach); color: var(--rg-graphite); box-shadow: none; transform: translateY(-2px); }
+.used { margin-top: 24px; min-height: 56px; padding: 16px 20px; background: var(--rg-graphite); color: var(--rg-cream); font-size: 17px; clip-path: var(--clip-sm); }
+.used b { color: var(--rg-peach); }
+
+/* contact */
+.cta { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 24px; }
+.cta h2 { color: var(--rg-white); }
+.btn-secondary { background: var(--rg-white); color: var(--rg-green-700); height: 48px; padding: 0 32px; }
+.btn-secondary:hover { background: var(--rg-cream); }
+footer { background: var(--rg-graphite); color: var(--rg-muted-on-dark); padding: 32px 0; font-size: 15px; }
+
+/* reveal on scroll — content is visible without JS; JS only adds the entrance */
+.js .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s, transform .6s; }
+.js .reveal.seen { opacity: 1; transform: none; }
+
+@media (max-width: 900px) {
+  nav.links { display: none; }
+  .hero-grid, .case, .sec-head { grid-template-columns: 1fr; gap: 32px; }
+  .timeline { margin-left: 0; }
+  .areas { grid-template-columns: 1fr; }
+  .rack { position: static; }
+  .sk { grid-template-columns: 1fr; gap: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .js .reveal { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="note">Mockup v4 · Raccoon Gang colours &amp; type + animations. Scroll slowly, click the rack modules, the skill chips, "Show all", EN/UK and the theme button.
+  <span class="options"><span class="option" data-choice="v4-good" onclick="toggleSelect(this)">Approve</span><span class="option" data-choice="v4-close" onclick="toggleSelect(this)">Close, needs changes</span></span>
+  <span class="fxpick" role="group" aria-label="Theme switch effect">Theme effect:
+    <button type="button" data-fx="wave" aria-pressed="true">Wave flood</button>
+    <button type="button" data-fx="crt" aria-pressed="false">TV switch-off</button>
+    <button type="button" data-fx="circle" aria-pressed="false">Circle</button>
+  </span>
+  <span class="options" style="margin-left:8px"><span class="option" data-choice="fx-wave" onclick="toggleSelect(this)">Pick wave</span><span class="option" data-choice="fx-crt" onclick="toggleSelect(this)">Pick TV</span><span class="option" data-choice="fx-circle" onclick="toggleSelect(this)">Pick circle</span></span>
+</div>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="sq"></span>Kyrylo Kireiev</a>
+    <nav class="links">
+      <a href="#experience" data-en="Experience" data-uk="Досвід">Experience</a>
+      <a href="#work" data-en="Work" data-uk="Проєкти">Work</a>
+      <a href="#skills" data-en="Skills" data-uk="Навички">Skills</a>
+      <a href="#contact" data-en="Contact" data-uk="Контакти">Contact</a>
+    </nav>
+    <div class="tools">
+      <span class="seg" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="uk" aria-pressed="false">UK</button></span>
+      <button class="icon-btn" type="button" id="theme" aria-label="Toggle theme"><i data-lucide="sun-moon"></i></button>
+      <a class="btn btn-outline btn-sm" href="#top"><i data-lucide="download"></i>PDF</a>
+      <a class="btn btn-green" href="#contact"><i data-lucide="mail"></i><span data-en="Email" data-uk="Написати">Email</span></a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <div class="eyebrow" data-en="Software Engineer · Dnipro, Ukraine" data-uk="Software Engineer · Дніпро, Україна">Software Engineer · Dnipro, Ukraine</div>
+          <h1>Kyrylo <span class="acc">Kireiev</span></h1>
+          <div class="rotor"><span data-en="I build" data-uk="Я створюю">I build</span>
+            <span class="slot" id="slot"><span>Django services</span></span></div>
+          <p class="summary" data-en="Python backends, and the interfaces on top of them, for EdTech and Ukrainian public-sector platforms. Open edX core contributor." data-uk="Python-бекенди та інтерфейси над ними для EdTech і українських державних платформ. Контриб'ютор ядра Open edX.">Python backends, and the interfaces on top of them, for EdTech and Ukrainian public-sector platforms. Open edX core contributor.</p>
+          <div class="tags"><span class="tag">Python</span><span class="tag">Django</span><span class="tag">DRF</span><span class="tag">PostgreSQL</span><span class="tag">Open edX</span><span class="tag">Tutor</span><span class="tag">Odoo</span><span class="tag fe">React</span><span class="tag fe">Datastar</span><span class="tag fe">HTMX</span><span class="tag">Docker</span></div>
+          <div class="contact">
+            <span class="mail"><a class="btn btn-green" href="#contact"><i data-lucide="mail"></i>kirillkireev888@gmail.com</a><button class="btn btn-green" type="button" aria-label="Copy email"><i data-lucide="copy"></i></button></span>
+            <a class="out" href="#top">GitHub <i data-lucide="arrow-up-right"></i></a>
+            <a class="out" href="#top">LinkedIn <i data-lucide="arrow-up-right"></i></a>
+            <a class="out" href="#top">Telegram <i data-lucide="arrow-up-right"></i></a>
+            <a class="out" href="#top">Facebook <i data-lucide="arrow-up-right"></i></a>
+          </div>
+          <dl class="meta">
+            <div><dt data-en="Location" data-uk="Місто">Location</dt><dd data-en="Dnipro, Ukraine" data-uk="Дніпро, Україна">Dnipro, Ukraine</dd></div>
+            <div><dt data-en="Time zone" data-uk="Часовий пояс">Time zone</dt><dd>UTC+2/+3</dd></div>
+            <div><dt data-en="English" data-uk="Англійська">English</dt><dd>B1</dd></div>
+            <div><dt data-en="Updated" data-uk="Оновлено">Updated</dt><dd data-en="Oct 2026" data-uk="жовт. 2026">Oct 2026</dd></div>
+          </dl>
+        </div>
+        <div class="metrics">
+          <div class="metric"><span class="live"></span><b data-count="6">6</b><span data-en="pull requests merged into Open edX core" data-uk="pull request-ів злито в ядро Open edX">pull requests merged into Open edX core</span></div>
+          <div class="metric"><span class="live"></span><b data-count="127">127</b><span data-en="merge requests on a two-service exam platform, in 8 months" data-uk="merge request-ів у двосервісній екзаменаційній платформі за 8 місяців">merge requests on a two-service exam platform, in 8 months</span></div>
+          <div class="metric"><span class="live"></span><b data-count="494">494</b><span data-en="merged changes across 84 projects since 2023" data-uk="злитих змін у 84 проєктах з 2023 року">merged changes across 84 projects since 2023</span></div>
+        </div>
+      </div>
+    </div>
+    <svg class="wave" viewBox="0 0 2400 72" preserveAspectRatio="none" aria-hidden="true"><g class="track"><path id="w1" stroke="#559479"/><path id="w2" stroke="#F89D6A"/></g></svg>
+  </div>
+
+  <section class="band dark" id="experience">
+    <div class="wrap">
+      <div class="sec-head reveal"><div><div class="eyebrow" data-en="Career" data-uk="Кар'єра">Career</div><h2 data-en="Where I <span class='acc'>work</span>" data-uk="Де я <span class='acc'>працюю</span>">Where I <span class="acc">work</span></h2></div><p data-en="An Open edX vendor, a healthcare startup, and a career in broadcasting before that." data-uk="Open edX-вендор, медичний стартап, а до того — кар'єра на телебаченні.">An Open edX vendor, a healthcare startup, and a career in broadcasting before that.</p></div>
+      <div class="timeline" id="timeline">
+        <div class="rail"><i></i></div>
+        <div class="job reveal"><div class="row"><b class="co">Raccoon Gang</b><span class="when">May 2023 – now</span></div><div class="role">Software Engineer · Open edX vendor · 84 projects</div>
+          <div class="areas" id="areas">
+            <div class="area"><span class="yr">2026</span><b>Exam platform</b><p>Odoo task bank + Django/Datastar exam service, JWT link between them</p><div class="mini"><span>Odoo</span><span>Django</span><span>Datastar</span></div></div>
+            <div class="area"><span class="yr">2025–26</span><b>AI tooling for Open edX</b><p>AI grader for open answers, course knowledge base (RAG), Studio content assistant</p><div class="mini"><span>OpenAI</span><span>Gemini</span><span>Qdrant</span><span>MCP</span></div></div>
+            <div class="area"><span class="yr">2025</span><b>Auth &amp; organisation service</b><p>Greenfield REST service: sign-in, password reset, org hierarchy, background jobs</p><div class="mini"><span>DRF</span><span>JWT</span><span>Celery</span><span>MinIO</span></div></div>
+            <div class="area"><span class="yr">2024–25</span><b>Gamification</b><p>Leaderboard, badges, achievements and points for a learning platform</p><div class="mini"><span>Django</span><span>MySQL</span><span>Celery</span></div></div>
+            <div class="area more"><span class="yr">2023–25</span><b>Adaptive learning &amp; XBlocks</b><p>Library-reuse tracking in Studio, progression rules, diagnostic-test and file-submission XBlocks</p><div class="mini"><span>XBlocks</span><span>Studio</span></div></div>
+            <div class="area more"><span class="yr">2023–25</span><b>Mobile API</b><p>Progress, enrolments, offline mode and push notifications for the Open edX apps; S3 storage</p><div class="mini"><span>DRF</span><span>S3</span><span>Firebase</span></div></div>
+            <div class="area more"><span class="yr">2025</span><b>Corporate access control</b><p>Users, groups and email domains managing program and course access, CSV import</p><div class="mini"><span>Django</span><span>Open edX</span></div></div>
+            <div class="area more"><span class="yr">2024–26</span><b>Frontend &amp; MFEs</b><p>Plugin slots in Studio editors, account MFE features, themes and template overrides</p><div class="mini"><span>React</span><span>RTL</span><span>SCSS</span></div></div>
+            <div class="area more"><span class="yr">2024–26</span><b>Deployments &amp; releases</b><p>Tutor plugins, stage and production releases, Sentry, SSO and SCIM</p><div class="mini"><span>Tutor</span><span>Docker</span><span>Sentry</span></div></div>
+            <div class="area more"><span class="yr">2023–26</span><b>Localisation</b><p>Ukrainian, Polish, Spanish, Portuguese and French-Canadian across LMS, Studio and MFEs</p><div class="mini"><span>i18n</span></div></div>
+          </div>
+          <button class="btn btn-sm showall" type="button" id="showall" aria-expanded="false" aria-controls="areas"><i data-lucide="plus"></i><span>Show all 10 areas</span></button>
+        </div>
+        <div class="job reveal"><div class="row"><b class="co">Yalantis</b><span class="when">Nov 2022 – May 2023</span></div><div class="role">Python Developer</div>
+          <ul><li>US healthcare startup for kidney-disease patients: a social network for doctors and patients</li><li>Team of 25, from development to launch</li></ul></div>
+        <div class="job dim reveal"><div class="row"><b class="co">Before code</b><span class="when">2012 – 2020</span></div><div class="role">Musician · journalist and TV presenter, Suspilne</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="work">
+    <div class="wrap">
+      <div class="sec-head reveal"><div><div class="eyebrow" data-en="Selected work" data-uk="Вибрані проєкти">Selected work</div><h2 data-en="What I <span class='acc'>built</span>" data-uk="Що я <span class='acc'>зробив</span>">What I <span class="acc">built</span></h2></div><p class="muted" data-en="Click a module on the rack: the signal shows how the pieces talk." data-uk="Натисніть модуль: сигнал покаже, як частини взаємодіють.">Click a module on the rack: the signal shows how the pieces talk.</p></div>
+      <div class="tabs" role="tablist">
+        <button role="tab" aria-selected="true" data-tab="p1"><span class="n">01</span>Exam platform</button>
+        <button role="tab" aria-selected="false" data-tab="p2"><span class="n">02</span>Open edX core</button>
+        <button role="tab" aria-selected="false" data-tab="p3"><span class="n">03</span>AI tooling</button>
+        <button role="tab" aria-selected="false" data-tab="p4"><span class="n">04</span>Adaptive learning</button>
+        <button role="tab" aria-selected="false" data-tab="p5"><span class="n">05</span>Gamification</button>
+      </div>
+
+      <div class="panel" id="p1">
+        <div class="case">
+          <div class="rack">
+            <div class="rhead"><span>01 / 05 · exam platform</span><span>live</span></div>
+            <div class="bay" data-links="sso-exam,exam-bank,exam-db,bank-db">
+              <svg class="cables" aria-hidden="true"></svg>
+              <button class="mod" type="button" data-id="sso" data-text="Sign-in: national digital-ID SSO, password and candidate-code login."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>Digital-ID SSO</b><small>auth</small></button>
+              <button class="mod" type="button" data-id="exam" data-text="Exam service: session lifecycle, extra time, recovery after re-auth, audit log, results and commission grading."><span class="led"></span><div class="jacks"><span class="jack"></span><span class="jack"></span></div><b>Exam service</b><small>Django 5.2 · Datastar · SSE</small></button>
+              <button class="mod" type="button" data-id="bank" data-text="Task bank on Odoo 18: review flow, archive/restore, order templates, document signing, OLX export."><span class="led"></span><div class="jacks"><span class="jack"></span><span class="jack"></span></div><b>Task bank</b><small>Odoo 18 · 24 add-ons</small></button>
+              <button class="mod" type="button" data-id="db" data-text="PostgreSQL only: data plus background jobs via Procrastinate (LISTEN/NOTIFY). No Redis."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>PostgreSQL</b><small>data · jobs</small></button>
+            </div>
+            <div class="readout" aria-live="polite"><span class="p">›</span> exam ⇄ bank: JWT-signed API, async bundle exchange, results transfer <span class="cur"></span></div>
+          </div>
+          <article class="card">
+            <div class="top"><span class="pill">Greenfield</span>Feb – Oct 2026</div>
+            <h3>Exam platform</h3>
+            <div class="ctx">Ukrainian public body · qualification exams · two services</div>
+            <dl class="kv"><dt>Role</dt><dd>Software engineer, features on both services</dd><dt>Team</dt><dd>Several engineers</dd></dl>
+            <div><div class="lbl">Problem</div>Questions written and reviewed in one system; exams taken securely in another.</div>
+            <div><div class="lbl">What I did</div><ul><li>Exam sessions end to end: start, extra time, recovery, grading</li><li>Task bank features in Odoo: review, archive, signing</li><li>Much of the JWT integration between the two</li></ul></div>
+            <div class="hard"><div class="lbl">Hardest bug</div>A browser freeze in the live exam UI, traced to how Datastar morphs the page over SSE and fixed at the root.</div>
+            <div class="nums"><div><b data-count="127">127</b><span>merge requests</span></div><div><b data-count="123">123</b><span>merged</span></div><div><b data-count="8">8</b><span>months</span></div></div>
+            <div class="stack">Python 3.12 · Django 5.2 · Datastar · Odoo 18 · PostgreSQL · Procrastinate · pytest · GitLab CI</div>
+          </article>
+        </div>
+      </div>
+
+      <div class="panel" id="p2" hidden>
+        <div class="case">
+          <div class="rack">
+            <div class="rhead"><span>02 / 05 · upstream</span><span>6 merged · 1 open</span></div>
+            <div class="bay" data-links="m1-m2,m2-m3,m3-m4,m5-m6">
+              <svg class="cables" aria-hidden="true"></svg>
+              <button class="mod" type="button" data-id="m1" data-text="#34848 Mobile API: course progress + primary courses on the dashboard. Merged Jul 2024."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>#34848</b><small>mobile API · progress</small></button>
+              <button class="mod" type="button" data-id="m2" data-text="#34859 Enrolments status API with a 30-day activity rule and a query limit. Merged Nov 2024."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>#34859</b><small>enrolments status</small></button>
+              <button class="mod" type="button" data-id="m3" data-text="#36969 Fixed a 500 in the blocks API: a helper returned a dict instead of a list. Merged Sep 2025."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>#36969</b><small>500 fix</small></button>
+              <button class="mod" type="button" data-id="m4" data-text="#36970 Short assignment labels in the Course Info blocks API. Merged Sep 2025."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>#36970</b><small>assignment labels</small></button>
+              <button class="mod" type="button" data-id="m5" data-text="edx-enterprise #2488: removed the pinned openai dependency. Merged Dec 2025."><span class="led"></span><div class="jacks"><span class="jack"></span></div><b>enterprise #2488</b><small>dependency removal</small></button>
+              <button class="mod" type="button" data-id="m6" data-text="frontend-app-authoring #2749: plugin slots for HTML and Problem editors. In review."><span class="led amber"></span><div class="jacks"><span class="jack"></span></div><b>authoring #2749</b><small>plugin slots · open</small></button>
+            </div>
+            <div class="readout" aria-live="polite"><span class="p">›</span> green = merged · peach = in review <span class="cur"></span></div>
+          </div>
+          <article class="card">
+            <div class="top"><span class="pill">Open source</span>2023 – 2025</div>
+            <h3>Open edX core</h3>
+            <div class="ctx">openedx-platform · edx-enterprise · MFE components</div>
+            <div><div class="lbl">What I did</div><ul><li>Mobile and blocks APIs used by the Open edX apps</li><li>Dependency clean-up and test migration (Enzyme → RTL)</li><li>2023 mobile-API work, upstreamed via a teammate's PRs</li></ul></div>
+            <div class="nums"><div><b data-count="6">6</b><span>merged</span></div><div><b data-count="3">3</b><span>repositories</span></div><div><b data-count="1">1</b><span>in review</span></div></div>
+            <div class="stack">Django · DRF · React · Jest / RTL</div>
+          </article>
+        </div>
+      </div>
+      <div class="panel" id="p3" hidden><div class="soon">03 AI tooling · same format: rack (LLM ↔ Qdrant ↔ Studio ↔ Tutor) + card</div></div>
+      <div class="panel" id="p4" hidden><div class="soon">04 Adaptive learning · ~100 MRs over 26 months · same format</div></div>
+      <div class="panel" id="p5" hidden><div class="soon">05 Gamification backend · same format</div></div>
+    </div>
+  </section>
+
+  <section class="band deep" id="skills">
+    <div class="wrap">
+      <div class="sec-head reveal"><div><div class="eyebrow" data-en="Toolbox" data-uk="Інструменти">Toolbox</div><h2 data-en="What I <span class='acc'>use</span>" data-uk="Чим я <span class='acc'>користуюсь</span>">What I <span class="acc">use</span></h2></div><p data-en="White = core, used for years. Click any skill to see where I used it." data-uk="Білі — основні. Натисніть навичку, щоб побачити, де я її застосовував.">White = core, used for years. Click any skill to see where I used it.</p></div>
+      <div class="reveal">
+        <div class="sk"><span class="g">Backend</span><div class="chips"><button class="chip core" data-used="Every project since 2022: exam platform, auth service, Open edX plugins and APIs.">Python</button><button class="chip core" data-used="Exam service, auth &amp; organisation service, gamification, Open edX (it is Django).">Django</button><button class="chip core" data-used="Mobile API upstream (#34848, #34859), auth service, gamification APIs.">DRF</button><button class="chip" data-used="Gamification event posting, auth service background jobs.">Celery</button><button class="chip" data-used="Exam platform: background jobs on PostgreSQL LISTEN/NOTIFY.">Procrastinate</button><button class="chip" data-used="Exam ⇄ task bank JWT link, national digital-ID SSO, OAuth2, SCIM.">JWT · OAuth2 · SSO</button><button class="chip" data-used="AI tooling: structured LLM responses.">Pydantic</button></div></div>
+        <div class="sk"><span class="g">Frontend</span><div class="chips"><button class="chip" data-used="Open edX MFEs: Studio editor plugin slots (#2749), account MFE, cookie banner tests (#445).">React</button><button class="chip" data-used="Exam service UI: live updates over SSE, morphing; fixed a browser-freeze bug at the root.">Datastar</button><button class="chip" data-used="Open edX plugin cookiecutter with HTMX support (2023).">HTMX</button><button class="chip" data-used="Exam service templates; Open edX theme and template overrides.">Django templates</button><button class="chip" data-used="MFE work and front-end fixes.">JavaScript</button><button class="chip" data-used="Open edX themes, exam service styles.">SCSS</button><button class="chip" data-used="Migrated cookie-banner tests from Enzyme to React Testing Library (#445).">React Testing Library</button></div></div>
+        <div class="sk"><span class="g">Platforms</span><div class="chips"><button class="chip core" data-used="Most of my work since 2023, plus 6 merged upstream PRs.">Open edX</button><button class="chip core" data-used="Adaptive-learning XBlocks: diagnostic test, file submission, library sourcing.">XBlocks</button><button class="chip core" data-used="Plugins, deployments and stage releases for several clients.">Tutor</button><button class="chip" data-used="Exam platform task bank: 24 custom add-ons, 67 merge requests.">Odoo 18</button></div></div>
+        <div class="sk"><span class="g">Data</span><div class="chips"><button class="chip" data-used="Exam platform (both services).">PostgreSQL</button><button class="chip" data-used="Open edX; gamification points and charts.">MySQL</button><button class="chip" data-used="Auth service: Redis, Celery and MinIO setup.">Redis</button><button class="chip" data-used="Role and organisation search in Studio and LMS.">Elasticsearch</button><button class="chip" data-used="S3 storage for the Open edX mobile backend; MinIO in the auth service.">S3 · MinIO</button><button class="chip" data-used="AI tooling: vector search for the course knowledge base.">Qdrant</button></div></div>
+        <div class="sk"><span class="g">AI</span><div class="chips"><button class="chip" data-used="AI grader for open answers; content assistant.">OpenAI · Gemini</button><button class="chip" data-used="Course knowledge base: chunking and vector search.">RAG</button><button class="chip" data-used="Open edX connector for AI assistants.">MCP</button><button class="chip" data-used="This CV was built with an AI-assisted workflow.">Claude Code</button></div></div>
+        <div class="sk"><span class="g">Delivery</span><div class="chips"><button class="chip core" data-used="Every project.">Docker</button><button class="chip core" data-used="Pipelines, pre-commit, MR templates.">GitLab CI</button><button class="chip core" data-used="Exam platform suite; TDD in gamification.">pytest</button><button class="chip" data-used="Error tracking in client deployments.">Sentry</button></div></div>
+        <div class="used" id="used" aria-live="polite">Click a skill above.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band green" id="contact">
+    <div class="wrap cta reveal">
+      <h2 data-en="Let's talk" data-uk="Поговорімо">Let's talk</h2>
+      <a class="btn btn-secondary" href="#top"><i data-lucide="mail"></i>kirillkireev888@gmail.com</a>
+    </div>
+  </section>
+</main>
+<footer><div class="wrap">Kyrylo Kireiev · Static site, no trackers · Updated Oct 2026</div></footer>
+
+<script>
+  if (window.lucide) lucide.createIcons();
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // theme + language
+  const root = document.documentElement, themeBtn = document.getElementById("theme");
+  let fx = "wave";
+  document.querySelectorAll("[data-fx]").forEach(b => b.addEventListener("click", () => {
+    fx = b.dataset.fx;
+    document.querySelectorAll("[data-fx]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  }));
+
+  // wavy top edge rising from below the screen to above it, as clip-path polygons
+  function waveFrames(steps = 24, pts = 48) {
+    const frames = [];
+    for (let s = 0; s <= steps; s++) {
+      const k = s / steps, ease = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      const base = 112 - ease * 130, amp = 6 * Math.sin(Math.PI * k) + 1, ph = k * Math.PI * 6;
+      const poly = [];
+      for (let i = 0; i <= pts; i++) {
+        const x = (i / pts) * 100;
+        const y = base + amp * Math.sin(x / 100 * Math.PI * 4 + ph) + amp * .5 * Math.sin(x / 100 * Math.PI * 9 - ph);
+        poly.push(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
+      }
+      poly.push("100% 120%", "0% 120%");
+      frames.push({ clipPath: `polygon(${poly.join(",")})` });
+    }
+    return frames;
+  }
+
+  function runFx(x, y) {
+    const opts = (duration, easing = "linear") => ({ duration, easing, fill: "both" });
+    if (fx === "circle") {
+      const R = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+      root.animate({ clipPath: [`circle(0 at ${x}px ${y}px)`, `circle(${R}px at ${x}px ${y}px)`] },
+        { ...opts(1200, "cubic-bezier(.65,0,.35,1)"), pseudoElement: "::view-transition-new(root)" });
+    } else if (fx === "wave") {
+      root.animate(waveFrames(), { ...opts(1600), pseudoElement: "::view-transition-new(root)" });
+    } else {
+      root.animate([
+        { transform: "scale(1,1)", filter: "brightness(1)" },
+        { transform: "scale(1,.006)", filter: "brightness(2.5)", offset: .35 },
+        { transform: "scale(.002,.006)", filter: "brightness(4)", offset: .5 },
+        { transform: "scale(0,0)", filter: "brightness(4)", offset: .51 },
+        { transform: "scale(0,0)", filter: "brightness(4)" }
+      ], { ...opts(1500, "cubic-bezier(.5,0,.75,0)"), pseudoElement: "::view-transition-old(root)" });
+      root.animate([
+        { transform: "scale(.002,.006)", filter: "brightness(4)", opacity: 0 },
+        { transform: "scale(.002,.006)", filter: "brightness(4)", opacity: 0, offset: .5 },
+        { transform: "scale(1,.006)", filter: "brightness(2.5)", opacity: 1, offset: .68 },
+        { transform: "scale(1,1)", filter: "brightness(1)", opacity: 1 }
+      ], { ...opts(1500, "cubic-bezier(.25,1,.5,1)"), pseudoElement: "::view-transition-new(root)" });
+    }
+  }
+
+  themeBtn.addEventListener("click", () => {
+    const next = root.dataset.theme === "dark" ? "light" : "dark";
+    const apply = () => { root.dataset.theme = next; };
+    if (reduce || !document.startViewTransition) return apply();
+    const r = themeBtn.getBoundingClientRect();
+    root.classList.toggle("fx-crt", fx === "crt");
+    const vt = document.startViewTransition(apply);
+    vt.ready.then(() => runFx(r.left + r.width / 2, r.top + r.height / 2));
+    vt.finished.finally(() => root.classList.remove("fx-crt"));
+  });
+  let lang = "en";
+  const langBtns = document.querySelectorAll("[data-lang]");
+  langBtns.forEach(b => b.addEventListener("click", () => {
+    lang = b.dataset.lang;
+    langBtns.forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-en]").forEach(el => el.innerHTML = el.dataset[lang]);
+  }));
+
+  // rotating "I build …"
+  const words = { en: ["Django services", "Open edX plugins", "Odoo add-ons", "React & Datastar UIs", "AI tooling"],
+                  uk: ["Django-сервіси", "плагіни Open edX", "модулі Odoo", "інтерфейси React і Datastar", "AI-інструменти"] };
+  const slot = document.getElementById("slot"); let wi = 0;
+  if (!reduce) setInterval(() => {
+    wi = (wi + 1) % words.en.length;
+    const old = slot.firstElementChild; old.className = "out";
+    const n = document.createElement("span"); n.className = "in"; n.textContent = words[lang][wi];
+    n.style.position = "absolute"; n.style.top = 0; slot.appendChild(n);
+    setTimeout(() => { old.remove(); n.style.position = ""; n.className = ""; }, 460);
+  }, 2400);
+
+  // waveform: two signals, drawn twice so the loop is seamless
+  function wave(id, amp, f1, f2, phase) {
+    let d = "";
+    for (let x = 0; x <= 4800; x += 6) {
+      const y = 36 + amp * Math.sin((x / 1200) * Math.PI * 2 * f1 + phase) + amp * .4 * Math.sin((x / 1200) * Math.PI * 2 * f2);
+      d += (x ? "L" : "M") + x + " " + y.toFixed(1);
+    }
+    document.getElementById(id).setAttribute("d", d);
+  }
+  wave("w1", 18, 3, 11, 0); wave("w2", 10, 5, 2, 1.3);
+
+  // count-up when visible (HTML already holds the final number)
+  function countUp(el) {
+    if (reduce || el.dataset.done) return; el.dataset.done = 1;
+    const to = +el.dataset.count, t0 = performance.now(), dur = 1100;
+    (function step(t) { const k = Math.min(1, (t - t0) / dur); el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); })(t0);
+  }
+
+  // reveal + count + rack power-on
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return;
+    const el = e.target;
+    el.classList.add("seen");
+    el.querySelectorAll?.("[data-count]").forEach(countUp);
+    if (el.matches("[data-count]")) countUp(el);
+    if (el.classList.contains("metric")) el.querySelector(".live").classList.add("on");
+    if (el.classList.contains("rack") && !el.classList.contains("lit")) { el.classList.add("lit"); draw(el.querySelector(".bay"), null, true); }
+    io.unobserve(el);
+  }), { threshold: .25 });
+  document.querySelectorAll(".reveal, .metric, .rack, .nums b").forEach(el => io.observe(el));
+
+  // timeline rail grows with scroll
+  const tl = document.getElementById("timeline"), rail = tl.querySelector(".rail i");
+  function railP() { const r = tl.getBoundingClientRect(); const p = Math.min(1, Math.max(0, (innerHeight * .7 - r.top) / r.height)); rail.style.setProperty("--p", reduce ? 1 : p); }
+  addEventListener("scroll", railP, { passive: true }); railP();
+
+  // rack cables
+  function draw(bay, active, plug) {
+    const svg = bay.querySelector("svg.cables"), r = bay.getBoundingClientRect();
+    if (!r.width) return;
+    svg.setAttribute("viewBox", `0 0 ${r.width} ${r.height}`);
+    svg.innerHTML = bay.dataset.links.split(",").map((pair, i) => {
+      const [a, b] = pair.split("-");
+      const ja = bay.querySelector(`[data-id="${a}"] .jack:last-child`).getBoundingClientRect();
+      const jb = bay.querySelector(`[data-id="${b}"] .jack`).getBoundingClientRect();
+      const x1 = ja.left - r.left + 7, y1 = ja.top - r.top + 7, x2 = jb.left - r.left + 7, y2 = jb.top - r.top + 7;
+      const sag = 40 + Math.abs(x2 - x1) * .1 + Math.abs(y2 - y1) * .15;
+      const cls = (active && (a === active || b === active) ? "hot " : "") + (plug && !reduce ? "plug" : "");
+      return `<path data-a="${a}" data-b="${b}" class="${cls}" style="animation-delay:${i * .25}s" d="M${x1} ${y1} C${x1} ${y1 + sag} ${x2} ${y2 + sag} ${x2} ${y2}"/>`;
+    }).join("");
+    svg.querySelectorAll("path").forEach(p => p.style.setProperty("--len", p.getTotalLength()));
+  }
+  function pulse(bay, id) {
+    if (reduce) return;
+    const svg = bay.querySelector("svg.cables");
+    svg.querySelectorAll(`path[data-a="${id}"], path[data-b="${id}"]`).forEach(p => {
+      const L = p.getTotalLength(), fwd = p.dataset.a === id, c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      c.setAttribute("r", 6); svg.appendChild(c); const t0 = performance.now();
+      (function step(t) { const k = Math.min(1, (t - t0) / 700); const pt = p.getPointAtLength((fwd ? k : 1 - k) * L); c.setAttribute("cx", pt.x); c.setAttribute("cy", pt.y); if (k < 1) requestAnimationFrame(step); else c.remove(); })(t0);
+    });
+  }
+  const bays = document.querySelectorAll(".bay");
+  bays.forEach(bay => {
+    const out = bay.parentElement.querySelector(".readout");
+    bay.querySelectorAll(".mod").forEach(m => m.addEventListener("click", () => {
+      bay.querySelectorAll(".mod").forEach(x => x.classList.toggle("on", x === m));
+      out.innerHTML = '<span class="p">›</span> ' + m.dataset.text + ' <span class="cur"></span>';
+      draw(bay, m.dataset.id); pulse(bay, m.dataset.id);
+    }));
+  });
+  addEventListener("resize", () => bays.forEach(b => draw(b)));
+  document.fonts.ready.then(() => bays.forEach(b => draw(b)));
+
+  // tabs
+  const tabs = document.querySelectorAll("[role=tab]");
+  tabs.forEach(t => t.addEventListener("click", () => {
+    tabs.forEach(x => x.setAttribute("aria-selected", String(x === t)));
+    document.querySelectorAll(".panel").forEach(p => p.hidden = p.id !== t.dataset.tab);
+    const rack = document.querySelector(`#${t.dataset.tab} .rack`);
+    if (rack) requestAnimationFrame(() => { rack.classList.add("lit"); draw(rack.querySelector(".bay"), null, true); });
+    document.querySelectorAll(`#${t.dataset.tab} .nums b`).forEach(b => { delete b.dataset.done; countUp(b); });
+  }));
+
+  // show all areas
+  const showall = document.getElementById("showall"), areas = document.getElementById("areas");
+  showall.addEventListener("click", () => {
+    const open = areas.classList.toggle("all");
+    showall.setAttribute("aria-expanded", String(open));
+    showall.querySelector("span").textContent = open ? "Show fewer" : "Show all 10 areas";
+  });
+
+  // skills → where used
+  const used = document.getElementById("used"), chips = document.querySelectorAll(".chip");
+  chips.forEach(c => c.addEventListener("click", () => {
+    chips.forEach(x => x.setAttribute("aria-pressed", String(x === c)));
+    used.innerHTML = `<b>${c.textContent}</b> — ${c.dataset.used}`;
+  }));
+</script>
+</body>
+</html>
