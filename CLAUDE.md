@@ -19,6 +19,10 @@ the end). If it stops earning its place, delete it.
 - Lint/format: ESLint, Prettier, `astro check`.
 - Node 22 via nvm (`.nvmrc`).
 
+**Shell one-liners:** use `jq` for JSON and the Read/Grep tools for files. Avoid
+`python3 -c` / `python3 -` snippets and `sed -i`: each needs Kyrylo's approval, and
+"always allow" on them would auto-approve arbitrary code.
+
 **Node version gotcha:** each Bash call is a fresh shell and may start on an old Node.
 Always switch and run in the *same* command:
 `source ~/.nvm/nvm.sh && nvm use >/dev/null && npm run verify`
