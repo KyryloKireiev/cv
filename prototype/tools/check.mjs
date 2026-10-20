@@ -2,6 +2,9 @@
 // Usage: node check.mjs [origin]   (default http://127.0.0.1:8080, serving prototype/dist)
 import { chromium } from "playwright";
 import { AxeBuilder } from "@axe-core/playwright";
+import { readFile } from "node:fs/promises";
+
+const dict = JSON.parse(await readFile(new URL("../src/i18n.json", import.meta.url), "utf8"));
 
 const origin = process.argv[2] || "http://127.0.0.1:8080";
 const LOCALES = [["en", "/"], ["uk", "/uk/"]];
@@ -127,7 +130,13 @@ for (const [code, path] of LOCALES) {
       if (fails) await c.addInitScript(() => { navigator.clipboard.writeText = () => Promise.reject(new Error("denied")); });
       const p = await c.newPage();
       await p.goto(origin + path, { waitUntil: "networkidle" });
-      await p.click("#copy");
+      const clicked = await p.click("#copy", { timeout: 3000 }).then(() => true, () => false);
+      ok(clicked, `${code}: copy button not clickable at ${width}px (covered by another element?)`);
+      if (!clicked) { await c.close(); continue; }
+      // the status text appears only after the clipboard promise settles: wait for it, then measure
+      const want = dict[code][fails ? "toast.copyFail" : "toast.copied"];
+      await p.waitForFunction(() => document.getElementById("toast").textContent.trim(), null, { timeout: 3000 }).catch(() => {});
+      ok((await p.textContent("#toast")).trim() === want, `${code}: copy ${fails ? "failure" : "success"} at ${width}px should say "${want}"`);
       const hit = await p.evaluate(() => {
         const t = document.getElementById("toast").getBoundingClientRect();
         return [...document.querySelectorAll(".socials a, .mail .btn")].some((a) => {
