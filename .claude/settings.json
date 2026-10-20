@@ -23,7 +23,8 @@
       "mcp__claude_ai_GitLab__get_file_contents",
       "mcp__claude_ai_GitLab__get_repository_tree",
       "mcp__claude_ai_GitLab__list_commits",
-      "mcp__claude_ai_GitLab__get_merge_request"
+      "mcp__claude_ai_GitLab__get_merge_request",
+      "Bash(git push *)"
     ],
     "deny": [
       "Bash(gh repo delete *)",
