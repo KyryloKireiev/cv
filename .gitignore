@@ -1,0 +1,30 @@
+# Python virtualenv (not part of the site)
+venv/
+
+# Research notes may contain NDA client details — never commit.
+# Only facts Kyrylo approved go into content/cv/*.yaml.
+docs/research/
+
+# Dependencies and build output
+node_modules/
+dist/
+.astro/
+
+# Test artifacts
+test-results/
+playwright-report/
+blob-report/
+qa-screenshots/
+.playwright-mcp/
+coverage/
+.lighthouseci/
+npm-debug.log*
+
+# Local Claude Code settings and memory (personal, not shared)
+.claude/settings.local.json
+CLAUDE.local.md
+
+# OS / editor
+.DS_Store
+.env
+.env.*
