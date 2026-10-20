@@ -131,7 +131,7 @@ for (const [code, path] of LOCALES) {
       const p = await c.newPage();
       await p.goto(origin + path, { waitUntil: "networkidle" });
       const clicked = await p.click("#copy", { timeout: 3000 }).then(() => true, () => false);
-      ok(clicked, `${code}: copy button not clickable at ${width}px (covered by another element?)`);
+      ok(clicked, `${code}: copy button not clickable at ${width}px in the ${fails ? "failure" : "success"} run (covered by another element?)`);
       if (!clicked) { await c.close(); continue; }
       // the status text appears only after the clipboard promise settles: wait for it, then measure
       const want = dict[code][fails ? "toast.copyFail" : "toast.copied"];
