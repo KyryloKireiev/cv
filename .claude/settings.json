@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(git commit *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "WebSearch",
+      "WebFetch(domain:docs.astro.build)",
+      "WebFetch(domain:astro.build)",
+      "WebFetch(domain:playwright.dev)",
+      "WebFetch(domain:zod.dev)",
+      "WebFetch(domain:developers.cloudflare.com)",
+      "WebFetch(domain:github.com)"
     ]
   },
   "hooks": {
