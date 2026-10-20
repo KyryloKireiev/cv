@@ -90,6 +90,14 @@ In this order:
 | security-guidance plugin | Warns on risky code patterns as they're written |
 | commit-commands plugin | `/commit`, `/commit-push-pr` shortcuts; the hook still enforces verify |
 
+## v0 prototype
+
+Until the Astro build exists, the deployed site is `prototype/`: a hand-written page
+(`src/index.html`) with all text in `src/i18n.json`. `tools/build.mjs` checks locale
+parity, renders `/` and `/uk/`, favicons and both PDFs into `dist/`; `tools/check.mjs`
+runs browser checks (links, PDF, copy, theme, tabs, no third-party requests, no untranslated
+Ukrainian text). Run both before committing prototype changes. Same content rules apply.
+
 ## Reference
 
 Inspiration: https://kholodenko.dev (colleague at the same company, same domain). Reuse

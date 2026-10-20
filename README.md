@@ -3,8 +3,19 @@
 Personal CV site of a Python / Django software engineer working on Open edX.
 Single page, English and Ukrainian, with a downloadable PDF.
 
-> **Status:** in progress. The design is agreed
-> ([mockup](docs/design/mockup-v5.html)); the site itself is being built next.
+> **Status:** v0 is live-ready in [`prototype/`](prototype): a static page in English and
+> Ukrainian with PDFs. The full Astro build described in the
+> [design spec](docs/superpowers/specs/2026-10-20-cv-site-design.md) will replace it.
+
+## v0 (current)
+
+All text lives in [`prototype/src/i18n.json`](prototype/src/i18n.json), English and
+Ukrainian side by side. The build refuses to run if a key is missing in either language.
+
+```bash
+cd prototype/tools && npm install && npm run build   # → prototype/dist (pages, favicons, PDFs)
+node check.mjs http://127.0.0.1:8080                 # browser checks against a served dist/
+```
 
 ## Stack
 

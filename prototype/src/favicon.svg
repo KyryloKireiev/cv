@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Patch-bay mark: graphite panel with the RG clipped corner, two jacks, one peach cable -->
+  <path d="M7 0H32V32H0V7Z" fill="#323232"/>
+  <path d="M10 13C10 28 22 28 22 13" fill="none" stroke="#F89D6A" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="10" cy="12" r="4.2" fill="#2A2A2A" stroke="#559479" stroke-width="2.4"/>
+  <circle cx="22" cy="12" r="4.2" fill="#2A2A2A" stroke="#F9F3ED" stroke-width="2.4"/>
+</svg>
