@@ -75,6 +75,9 @@ for (const [code, path] of LOCALES) {
   await page.click("#p2 [data-id=m3]");
   ok((await page.textContent("#p2 .live")).includes("36969"), `${code}: rack live region did not get the full text`);
   ok((await page.getAttribute("#p2 [data-id=m3]", "aria-pressed")) === "true", `${code}: module aria-pressed not set`);
+  await page.setViewportSize({ width: 1200, height: 900 }); await page.waitForTimeout(100);
+  ok((await page.$$("#p2 svg.cables path.hot")).length === 2 && (await page.$$("#p2 svg.cables circle.port.hot")).length === 4, `${code}: selected module lost its cable highlight after a resize`);
+  await page.setViewportSize({ width: 1280, height: 900 });
   await page.click("#showall");
   ok((await page.$$eval("#areas .area", (as) => as.filter((a) => a.offsetParent).length)) === 10, `${code}: show-all did not reveal 10 areas`);
 
@@ -164,8 +167,9 @@ for (const [code, path] of LOCALES) {
     await c.close();
   }
 
-  // ---- rack cables: leave each module from its top edge and run only through the gaps, never over a module ----
-  for (const width of [1280, 375]) {
+  // ---- rack cables: from each module's top edge, only through the gaps, right angles only, every cable in
+  //      its own lane, and clear of other cables' ports ----
+  for (const width of [1280, 375, 320]) {
     const c = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" }); const p = await c.newPage();
     await p.goto(origin + path, { waitUntil: "networkidle" });
     for (let t = 1; t <= 5; t++) {
@@ -186,7 +190,34 @@ for (const [code, path] of LOCALES) {
             const hit = rects.find((r) => x > r.left + 2 && x < r.right - 2 && y > r.top + 2 && y < r.bottom - 2);
             if (hit) { out.push(`${pth.dataset.a}-${pth.dataset.b} crosses a module`); break; }
           }
+          // right angles only: straight runs are horizontal or vertical, every corner is a quarter turn
+          const d = pth.getAttribute("d"), name = `${pth.dataset.a}-${pth.dataset.b}`;
+          if (/[^MLQ\d.\s,-]/.test(d)) out.push(`${name}: uses curve commands other than corners`);
+          let cur = null;
+          for (const seg of d.match(/[MLQ][^MLQ]*/g)) {
+            const n = seg.slice(1).trim().split(/[\s,]+/).map(Number), near = (u, v) => Math.abs(u - v) < .5;
+            if (seg[0] === "L" && !near(n[0], cur[0]) && !near(n[1], cur[1])) { out.push(`${name}: diagonal run`); break; }
+            if (seg[0] === "Q" && !((near(n[0], cur[0]) && near(n[1], n[3])) || (near(n[1], cur[1]) && near(n[0], n[2])))) { out.push(`${name}: corner is not a right angle`); break; }
+            cur = seg[0] === "Q" ? [n[2], n[3]] : [n[0], n[1]];
+          }
         }
+        // sample every cable at 1px for the two tests below
+        const samples = paths.map((pth) => { const L = pth.getTotalLength(), pts = []; for (let s = 0; s <= L; s += 1) { const q = pth.getPointAtLength(s); pts.push([q.x, q.y]); } return pts; });
+        const dist = (p, pts) => Math.min(...pts.map((q) => Math.hypot(p[0] - q[0], p[1] - q[1])));
+        // own lane: no two cables run within 2px of each other for 8px or more (a right-angle crossing is ~4px)
+        for (let i = 0; i < paths.length; i++) for (let j = i + 1; j < paths.length; j++) {
+          let run = 0, worst = 0;
+          for (const p of samples[i]) { run = dist(p, samples[j]) < 2 ? run + 1 : 0; worst = Math.max(worst, run); }
+          if (worst >= 8) out.push(`${paths[i].dataset.a}-${paths[i].dataset.b} and ${paths[j].dataset.a}-${paths[j].dataset.b} share a line for ${worst}px`);
+        }
+        // clear of ports: a cable never passes within 7.5px of a port that is not one of its own two ends
+        const ports = [...bay.querySelectorAll("svg.cables circle.port")].map((c) => ({ l: c.dataset.l, p: [+c.getAttribute("cx"), +c.getAttribute("cy")] }));
+        if (ports.length !== 2 * paths.length || [...ports.map((p) => p.l), ...paths.map((p) => p.dataset.l)].some((l) => l === undefined))
+          out.push(`expected 2 ports per cable, each cable and port tagged with its link (data-l)`);
+        paths.forEach((pth, i) => {
+          const close = ports.find((pt) => pt.l !== pth.dataset.l && dist(pt.p, samples[i]) < 7.5);
+          if (close) out.push(`${pth.dataset.a}-${pth.dataset.b} runs through another cable's port`);
+        });
         return out;
       });
       for (const b of bad) ok(false, `${code} ${width}px rack ${t}: ${b}`);
