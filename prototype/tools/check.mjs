@@ -164,6 +164,36 @@ for (const [code, path] of LOCALES) {
     await c.close();
   }
 
+  // ---- rack cables: leave each module from its top edge and run only through the gaps, never over a module ----
+  for (const width of [1280, 375]) {
+    const c = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" }); const p = await c.newPage();
+    await p.goto(origin + path, { waitUntil: "networkidle" });
+    for (let t = 1; t <= 5; t++) {
+      await p.click(`#tab-p${t}`); await p.waitForTimeout(100);
+      const bad = await p.$eval(`#p${t} .bay`, (bay) => {
+        const rects = [...bay.querySelectorAll(".mod")].map((m) => m.getBoundingClientRect()), svgR = bay.querySelector("svg.cables").getBoundingClientRect();
+        const paths = [...bay.querySelectorAll("svg.cables path")], out = [];
+        if (paths.length !== bay.dataset.links.split(",").length) out.push(`expected ${bay.dataset.links.split(",").length} cables, found ${paths.length}`);
+        for (const pth of paths) {
+          const L = pth.getTotalLength(), start = pth.getPointAtLength(0), end = pth.getPointAtLength(L);
+          // both ends sit on the top edge of a module
+          for (const [pt, id] of [[start, pth.dataset.a], [end, pth.dataset.b]]) {
+            const r = bay.querySelector(`[data-id="${id}"]`).getBoundingClientRect(), x = svgR.left + pt.x, y = svgR.top + pt.y;
+            if (Math.abs(y - r.top) > 1 || x < r.left || x > r.right) out.push(`${pth.dataset.a}-${pth.dataset.b}: end not on the top edge of ${id}`);
+          }
+          for (let s = 0; s <= L; s += 3) {
+            const pt = pth.getPointAtLength(s), x = svgR.left + pt.x, y = svgR.top + pt.y;
+            const hit = rects.find((r) => x > r.left + 2 && x < r.right - 2 && y > r.top + 2 && y < r.bottom - 2);
+            if (hit) { out.push(`${pth.dataset.a}-${pth.dataset.b} crosses a module`); break; }
+          }
+        }
+        return out;
+      });
+      for (const b of bad) ok(false, `${code} ${width}px rack ${t}: ${b}`);
+    }
+    await c.close();
+  }
+
   // ---- phones: no tile hint until a tap, then the text opens right under the tapped tile ----
   {
     const c = await browser.newContext({ viewport: { width: 375, height: 800 } }); const p = await c.newPage();
