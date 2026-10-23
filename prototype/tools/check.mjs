@@ -177,7 +177,8 @@ for (const [code, path] of LOCALES) {
       return o.nextElementSibling?.id === "exp-live" && o.getBoundingClientRect().height > 0;
     }, null, { timeout: 2000 }).then(() => true, () => false);
     ok(backInSide, `${code}: open tile text did not move back to the side column when the window widened`);
-    await p.waitForFunction((w) => document.querySelector("#exp-out .tx").textContent === w, dict[code]["area.exam.x"], { timeout: 8000 }).catch(() => {});
+    const typedWide = await p.waitForFunction((w) => document.querySelector("#exp-out .tx").textContent === w, dict[code]["area.exam.x"], { timeout: 8000 }).then(() => true, () => false);
+    ok(typedWide, `${code}: after widening, the tile text never finished typing`);
     await p.$eval("#showall", (b) => b.scrollIntoView({ block: "center", behavior: "instant" }));
     const fitsWide = await p.$eval("#exp-out", (o) => o.getBoundingClientRect().bottom <= innerHeight + 1);
     ok(fitsWide, `${code}: after widening to 1024×600 the pinned tile text is cut off at the bottom`);
