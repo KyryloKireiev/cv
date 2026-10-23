@@ -117,6 +117,11 @@ for (const [code, path] of LOCALES) {
   await page.click("#pause");
   ok((await page.getAttribute("html", "class")).includes("paused") && (await page.getAttribute("#pause", "aria-pressed")) === "true", `${code}: pause button did not pause`);
   ok((await page.$eval(".wave .t1", (g) => getComputedStyle(g).animationPlayState)) === "paused", `${code}: waveform still moving when paused`);
+  // pause stops ambient motion only: a readout typed because the visitor clicked still types
+  await page.click("#tab-p1"); await page.click("#p1 [data-id=sso]");
+  ok((await page.textContent("#p1 .readout .tx")).length < dict[code]["c1.m.sso.x"].length, `${code}: with the waveform paused, readouts appear at once instead of typing`);
+  await page.click("#areas .area-btn >> nth=0");
+  ok((await page.textContent("#exp-out .tx")).length < dict[code]["area.exam.x"].length, `${code}: with the waveform paused, tile text appears at once instead of typing`);
 
   ok(errors.length === 0, `${code}: console errors ${JSON.stringify(errors)}`);
   ok(foreign.length === 0, `${code}: third-party requests ${JSON.stringify(foreign)}`);

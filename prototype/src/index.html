@@ -863,7 +863,8 @@ footer a { color: var(--rg-cream); }
   function type(out, text, live = out.querySelector(".live")) {
     const tx = out.querySelector(".tx"); clearInterval(out._t);
     live.textContent = text;
-    if (reduce || root.classList.contains("paused")) { tx.textContent = text; return; }
+    // only reduced motion skips typing; the pause button is for ambient motion, and typing follows the visitor's own click
+    if (reduce) { tx.textContent = text; return; }
     const words = text.split(" "); let i = 0; tx.textContent = "";
     out._t = setInterval(() => { tx.textContent += (i ? " " : "") + words[i++]; if (i >= words.length) clearInterval(out._t); }, 45);
   }
