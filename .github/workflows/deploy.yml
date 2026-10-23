@@ -1,0 +1,59 @@
+# Every pull request: unit tests, build (pages, favicons, PDFs) and all browser + axe checks.
+# Push to main (a merged PR): the same, then deploy prototype/dist to Cloudflare.
+# Nothing is deployed if any step fails.
+name: Build, check, deploy
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # a newer PR push replaces the old run; a deploy on main is never cut off halfway
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  site:
+    # pinned: Playwright 1.56.1 supports 24.04 but not 26.04 (what ubuntu-latest became)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: prototype/tools
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: prototype/tools/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm test
+      - run: npm run build
+      - name: Browser and accessibility checks
+        run: |
+          python3 -m http.server 8080 --bind 127.0.0.1 -d ../dist &
+          for i in $(seq 20); do curl -fs -o /dev/null http://127.0.0.1:8080/ && break; sleep 0.5; done
+          npm run check
+      # wrangler and everything it pulls in come from deploy/package-lock.json, never resolved fresh;
+      # installed in its own step so install scripts never see the Cloudflare token
+      - name: Install the deploy tool
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        working-directory: .
+        run: npm ci --prefix deploy --no-audit --no-fund
+      - name: Deploy to Cloudflare
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        working-directory: .
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_SEND_METRICS: "false"
+        run: deploy/node_modules/.bin/wrangler deploy

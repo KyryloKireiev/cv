@@ -169,8 +169,21 @@ h2 .acc { color: var(--accent-lg); }
 .sec-head p { margin: 0; }
 .band.dark .eyebrow, .band.dark .sec-head p { color: var(--rg-muted-on-dark); }
 
-/* experience */
-.timeline { position: relative; margin-left: 30%; padding-left: 40px; }
+/* experience: title and tile readout pinned in the left column while the tiles scroll past */
+.exp { display: grid; grid-template-columns: 30% minmax(0, 1fr); align-items: start; }
+.exp-side { position: sticky; top: 96px; padding-right: 40px; }
+.exp-side .sec-head { display: block; margin-bottom: 0; }
+.exp-side .sec-head p { margin-top: 16px; font-size: 17px; }
+.exp-side h2 { hyphens: manual; } /* the narrow column would split the accent word ("ПРА-ЦЮЮ") */
+/* .readout.exp-out: must outrank the shared .readout rule further down */
+.readout.exp-out { display: none; margin-top: 28px; padding: 14px 16px; min-height: 0; color: var(--rg-muted-on-dark); box-shadow: inset 0 0 0 1px var(--hairline-dark); clip-path: var(--clip-sm); overflow-wrap: anywhere; }
+.js .readout.exp-out { display: block; }
+:root[data-theme="dark"] .exp-out { background: var(--rg-graphite); }
+.readout.exp-out.open { color: var(--rg-cream); box-shadow: inset 0 0 0 1px var(--rg-peach); }
+.exp-out .rh { display: none; gap: 8px; align-items: center; margin-bottom: 8px; font: 600 12px/1.3 var(--font-code); letter-spacing: .06em; text-transform: uppercase; color: var(--rg-peach); }
+.exp-out .rh::before { content: ""; flex: none; width: 8px; height: 8px; background: var(--rg-green); }
+.exp-out.open .rh { display: flex; }
+.timeline { position: relative; padding-left: 40px; }
 .timeline .rail { position: absolute; left: 0; top: 6px; bottom: 0; width: 2px; background: var(--hairline-dark); }
 .timeline .rail i { position: absolute; inset: 0 0 auto 0; height: 100%; background: var(--rg-peach); transform-origin: top; transform: scaleY(var(--p, 1)); }
 .job { position: relative; padding-bottom: 48px; }
@@ -184,6 +197,11 @@ h2 .acc { color: var(--accent-lg); }
 .areas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
 .area { background: var(--rg-graphite-800); box-shadow: inset 0 0 0 1px var(--hairline-dark); clip-path: var(--clip-sm); padding: 18px 20px 18px 24px; display: grid; gap: 4px; align-content: start; transition: transform .2s, box-shadow .2s; }
 .area:hover { transform: translateY(-3px); box-shadow: inset 0 0 0 1px var(--rg-peach); }
+/* the title is the button (keyboard, screen readers); a click anywhere else on the tile is
+   passed to it by the script, so the description stays selectable */
+.area { cursor: pointer; }
+.area.on, .area:has(.area-btn:focus-visible) { box-shadow: inset 0 0 0 2px var(--rg-peach); }
+.area-btn { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; text-align: left; cursor: pointer; }
 :root[data-theme="dark"] .band.dark .area { background: var(--rg-graphite); }
 .area .yr { font: 500 13px var(--font-code); color: var(--rg-peach); }
 .area h4 { margin: 0; font: 700 20px/1.2 var(--font-web); }
@@ -217,12 +235,10 @@ h2 .acc { color: var(--accent-lg); }
 .rack { background: var(--rg-graphite); color: var(--rg-cream); clip-path: var(--clip); padding: 24px 20px 20px; position: sticky; top: 140px; }
 :root[data-theme="dark"] .rack { box-shadow: inset 0 0 0 1px var(--hairline-dark); }
 .rack .rhead { display: flex; justify-content: space-between; gap: 12px; font: 600 13px var(--font-web); letter-spacing: .08em; text-transform: uppercase; color: var(--rg-muted-on-dark); padding-left: 12px; }
-.bay { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-top: 16px; }
-.mod { position: relative; text-align: left; background: var(--rg-graphite-800); border: 0; box-shadow: inset 0 0 0 1px var(--hairline-dark); color: inherit; padding: 14px; min-height: 112px; cursor: pointer; font: inherit; transition: box-shadow .2s; }
+/* gaps are the cable ducts: the space above each row, between the columns and a channel on the left */
+.bay { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 30px; padding: 30px 0 0 20px; margin-top: 4px; }
+.mod { position: relative; text-align: left; background: var(--rg-graphite-800); border: 0; box-shadow: inset 0 0 0 1px var(--hairline-dark); color: inherit; padding: 20px 14px 14px; min-height: 104px; cursor: pointer; font: inherit; transition: box-shadow .2s; }
 .mod:hover, .mod[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--rg-peach); }
-.jacks { display: flex; gap: 8px; margin-bottom: 10px; }
-.jack { width: 14px; height: 14px; border-radius: 50%; border: 3px solid var(--rg-muted-on-dark); background: #1f1f1f; transition: border-color .2s; }
-.mod[aria-pressed="true"] .jack { border-color: var(--rg-peach); }
 .mod b { display: block; font: 700 19px/1.15 var(--font-web); }
 .mod small { display: block; margin-top: 4px; font: 400 12px var(--font-code); color: var(--rg-muted-on-dark); }
 .led { position: absolute; top: 14px; right: 14px; width: 8px; height: 8px; background: #1f1f1f; transition: background .2s; }
@@ -232,11 +248,13 @@ h2 .acc { color: var(--accent-lg); }
 .rack.lit .mod:nth-child(5) .led { transition-delay: .7s; } .rack.lit .mod:nth-child(6) .led { transition-delay: .9s; }
 .rack.lit .mod:nth-child(7) .led { transition-delay: 1.1s; } .rack.lit .mod:nth-child(8) .led { transition-delay: 1.3s; }
 svg.cables { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 3; }
-svg.cables path { fill: none; stroke: var(--rg-peach); stroke-width: 4; stroke-linecap: round; opacity: .55; transition: opacity .2s; }
+svg.cables path { fill: none; stroke: var(--rg-peach); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; opacity: .65; transition: opacity .2s; }
 svg.cables path.hot { opacity: 1; }
 svg.cables path.plug { stroke-dasharray: var(--len); stroke-dashoffset: var(--len); animation: plug .9s ease forwards; }
 @keyframes plug { to { stroke-dashoffset: 0; } }
-svg.cables circle { fill: var(--rg-cream); }
+svg.cables .port { fill: #1f1f1f; stroke: var(--rg-muted-on-dark); stroke-width: 2.5; transition: stroke .2s; }
+svg.cables .port.hot { stroke: var(--rg-peach); }
+svg.cables .sig { fill: var(--rg-cream); }
 .readout { margin-top: 16px; padding: 12px 14px; background: var(--rg-graphite-800); font: 400 13px/1.5 var(--font-code); color: var(--rg-cream); min-height: 64px; }
 .readout .p { color: var(--rg-peach); }
 .readout .cur { display: inline-block; width: 8px; height: 14px; background: var(--rg-peach); vertical-align: -2px; animation: blink 1s steps(2) infinite; }
@@ -315,11 +333,19 @@ footer a { color: var(--rg-cream); }
 .motion .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s, transform .6s; }
 .motion .reveal.seen { opacity: 1; transform: none; }
 
+@media (max-width: 1080px) {
+  /* just above the phone layout the Ukrainian header is a hair too wide with classic scrollbars */
+  header.nav .wrap, nav.links { gap: 16px; }
+}
 @media (max-width: 900px) {
   nav.links { display: none; }
   .hero-grid, .case, .sec-head { grid-template-columns: minmax(0, 1fr); gap: 32px; }
   .card h3 { font-size: 28px; }
-  .timeline { margin-left: 0; }
+  .exp { grid-template-columns: minmax(0, 1fr); }
+  .exp-side { position: static; padding-right: 0; margin-bottom: 48px; }
+  /* phones: no side column, so the text opens under the tapped tile (moved there by the script) */
+  .js .readout.exp-out:not(.open) { display: none; }
+  .areas > .readout.exp-out { margin-top: 0; }
   .areas { grid-template-columns: 1fr; }
   .rack { position: static; }
   .tabs { position: static; }
@@ -336,6 +362,9 @@ footer a { color: var(--rg-cream); }
   .btn-pdf span, .btn-email span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .btn-pdf, .btn-email { padding: 0 9px; }
   .socials { gap: 14px; }
+  .rack { padding-left: 14px; padding-right: 14px; }
+  .bay { gap: 22px; padding: 22px 0 0 14px; }
+  .mod { padding: 18px 10px 10px; }
 }
 @media (max-width: 359px) {
   .btn-email { display: none; } /* the hero has the same email button */
@@ -351,7 +380,8 @@ footer a { color: var(--rg-cream); }
   @page { size: A4; margin: 12mm 13mm 13mm; }
   :root { --bg: #fff; --surface: #fff; --fg: #323232; --muted: #6B6560; --accent-lg: #37604F; --accent: #37604F; --line: #EDE7E1; --card-edge: none; }
   body { font-size: 10.5pt; line-height: 1.35; background: #fff; }
-  header.nav, .skip, .wave-row, .rack, .tabs, .showall, .copy, .toast, .used, .band.green, .path, .board-wrap, .sec-head p, .metric .live, .rotor .slot { display: none !important; }
+  header.nav, .skip, .wave-row, .rack, .tabs, .showall, .copy, .toast, .used, .band.green, .path, .board-wrap, .sec-head p, .metric .live, .rotor .slot, .exp-out { display: none !important; }
+  .exp { display: block; } .exp-side { position: static; padding: 0; margin: 0; } .exp-side .sec-head { margin-bottom: 5pt; }
   .rotor-all { display: inline; position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; color: #37604F; }
   .wrap { max-width: none; padding: 0; }
   .hero { padding: 0; }
@@ -483,22 +513,27 @@ footer a { color: var(--rg-cream); }
   </div>
 
   <section class="band dark" id="experience">
-    <div class="wrap">
-      <div class="sec-head reveal"><div><div class="eyebrow" data-i18n="exp.eyebrow"></div><h2 data-i18n="exp.title"></h2></div><p data-i18n="exp.sub"></p></div>
+    <div class="wrap exp">
+      <div class="exp-side">
+        <div class="sec-head reveal"><div><div class="eyebrow" data-i18n="exp.eyebrow"></div><h2 data-i18n="exp.title"></h2></div><p data-i18n="exp.sub"></p></div>
+        <!-- typed copy for sighted users; screen readers get the whole text once from #exp-live -->
+        <div class="readout exp-out" id="exp-out" aria-hidden="true"><div class="rh"></div><span class="p">›</span><span class="tx" data-i18n="exp.pick"></span> <span class="cur"></span></div>
+        <p class="sr-only" id="exp-live" aria-live="polite"></p>
+      </div>
       <div class="timeline" id="timeline">
         <div class="rail" aria-hidden="true"><i></i></div>
         <div class="job reveal"><div class="row"><h3>Raccoon Gang</h3><span class="when" data-i18n="exp.rg.when"></span></div><div class="role" data-i18n="exp.rg.role"></div>
           <div class="areas" id="areas">
-            <div class="area"><span class="yr" data-i18n="area.exam.yr"></span><h4 data-i18n="area.exam.t"></h4><p data-i18n="area.exam.p"></p><div class="mini"><span>Odoo</span><span>Django</span><span>Datastar</span></div></div>
-            <div class="area"><span class="yr">2025–26</span><h4 data-i18n="area.ai.t"></h4><p data-i18n="area.ai.p"></p><div class="mini"><span>OpenAI</span><span>Gemini</span><span>Qdrant</span><span>MCP</span></div></div>
-            <div class="area"><span class="yr">2025</span><h4 data-i18n="area.auth.t"></h4><p data-i18n="area.auth.p"></p><div class="mini"><span>DRF</span><span>JWT</span><span>Celery</span><span>MinIO</span></div></div>
-            <div class="area"><span class="yr">2024–25</span><h4 data-i18n="area.game.t"></h4><p data-i18n="area.game.p"></p><div class="mini"><span>Django</span><span>MySQL</span><span>Celery</span></div></div>
-            <div class="area more"><span class="yr">2023–25</span><h4 data-i18n="area.adapt.t"></h4><p data-i18n="area.adapt.p"></p><div class="mini"><span>XBlocks</span><span>Studio</span></div></div>
-            <div class="area more"><span class="yr">2023–25</span><h4 data-i18n="area.mobile.t"></h4><p data-i18n="area.mobile.p"></p><div class="mini"><span>DRF</span><span>S3</span><span>Firebase</span></div></div>
-            <div class="area more"><span class="yr">2025</span><h4 data-i18n="area.access.t"></h4><p data-i18n="area.access.p"></p><div class="mini"><span>Django</span><span>Open edX</span></div></div>
-            <div class="area more"><span class="yr">2024–26</span><h4 data-i18n="area.fe.t"></h4><p data-i18n="area.fe.p"></p><div class="mini"><span>React</span><span>RTL</span><span>SCSS</span></div></div>
-            <div class="area more"><span class="yr">2024–26</span><h4 data-i18n="area.deploy.t"></h4><p data-i18n="area.deploy.p"></p><div class="mini"><span>Tutor</span><span>Docker</span><span>Sentry</span></div></div>
-            <div class="area more"><span class="yr">2023–26</span><h4 data-i18n="area.i18n.t"></h4><p data-i18n="area.i18n.p"></p><div class="mini"><span>i18n</span></div></div>
+            <div class="area"><span class="yr" data-i18n="area.exam.yr"></span><h4><button class="area-btn" type="button" aria-pressed="false" data-i18n="area.exam.t" data-i18n-text="area.exam.x"></button></h4><p data-i18n="area.exam.p"></p><div class="mini"><span>Odoo</span><span>Django</span><span>Datastar</span></div></div>
+            <div class="area"><span class="yr">2025–26</span><h4><button class="area-btn" type="button" aria-pressed="false" data-i18n="area.ai.t" data-i18n-text="area.ai.x"></button></h4><p data-i18n="area.ai.p"></p><div class="mini"><span>OpenAI</span><span>Gemini</span><span>Qdrant</span><span>MCP</span></div></div>
+            <div class="area"><span class="yr">2025</span><h4><button class="area-btn" type="button" aria-pressed="false" data-i18n="area.auth.t" data-i18n-text="area.auth.x"></button></h4><p data-i18n="area.auth.p"></p><div class="mini"><span>DRF</span><span>JWT</span><span>Celery</span><span>MinIO</span></div></div>
+            <div class="area"><span class="yr">2024–25</span><h4><button class="area-btn" type="button" aria-pressed="false" data-i18n="area.game.t" data-i18n-text="area.game.x"></button></h4><p data-i18n="area.game.p"></p><div class="mini"><span>Django</span><span>MySQL</span><span>Celery</span></div></div>
+            <div class="area more"><span class="yr">2023–25</span><h4><button class="area-btn" type="button" aria-pressed="false" data-i18n="area.adapt.t" data-i18n-text="area.adapt.x"></button></h4><p data-i18n="area.adapt.p"></p><div class="mini"><span>XBlocks</span><span>Studio</span></div></div>
+            <div class="area more"><span class="yr">2023–25</span><h4><button class="area-btn" type="button" aria-pressed="false" data-i18n="area.mobile.t" data-i18n-text="area.mobile.x"></button></h4><p data-i18n="area.mobile.p"></p><div class="mini"><span>DRF</span><span>S3</span><span>Firebase</span></div></div>
+            <div class="area more"><span class="yr">2025</span><h4><button class="area-btn" type="button" aria-pressed="false" data-i18n="area.access.t" data-i18n-text="area.access.x"></button></h4><p data-i18n="area.access.p"></p><div class="mini"><span>Django</span><span>Open edX</span></div></div>
+            <div class="area more"><span class="yr">2024–26</span><h4><button class="area-btn" type="button" aria-pressed="false" data-i18n="area.fe.t" data-i18n-text="area.fe.x"></button></h4><p data-i18n="area.fe.p"></p><div class="mini"><span>React</span><span>RTL</span><span>SCSS</span></div></div>
+            <div class="area more"><span class="yr">2024–26</span><h4><button class="area-btn" type="button" aria-pressed="false" data-i18n="area.deploy.t" data-i18n-text="area.deploy.x"></button></h4><p data-i18n="area.deploy.p"></p><div class="mini"><span>Tutor</span><span>Docker</span><span>Sentry</span></div></div>
+            <div class="area more"><span class="yr">2023–26</span><h4><button class="area-btn" type="button" aria-pressed="false" data-i18n="area.i18n.t" data-i18n-text="area.i18n.x"></button></h4><p data-i18n="area.i18n.p"></p><div class="mini"><span>i18n</span></div></div>
           </div>
           <button class="btn btn-sm showall" type="button" id="showall" aria-expanded="false" aria-controls="areas"><svg class="ico i-plus" aria-hidden="true"><use href="#i-plus"/></svg><svg class="ico i-minus" aria-hidden="true"><use href="#i-minus"/></svg><span id="showall-label" data-i18n="exp.showAll"></span></button>
         </div>
@@ -527,10 +562,10 @@ footer a { color: var(--rg-cream); }
             <div class="rhead"><span data-i18n="c1.rack"></span><span data-i18n="c1.state"></span></div>
             <div class="bay" data-links="sso-exam,exam-bank,exam-db,bank-db">
               <svg class="cables" aria-hidden="true"></svg>
-              <button class="mod" type="button" aria-pressed="false" data-id="sso" data-i18n-text="c1.m.sso.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b data-i18n="c1.m.sso.b"></b><small data-i18n="c1.m.sso.s"></small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="exam" data-i18n-text="c1.m.exam.x"><span class="led"></span><span class="jacks"><span class="jack"></span><span class="jack"></span></span><b data-i18n="c1.m.exam.b"></b><small>Django 5.2 · Datastar · SSE</small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="bank" data-i18n-text="c1.m.bank.x"><span class="led"></span><span class="jacks"><span class="jack"></span><span class="jack"></span></span><b data-i18n="c1.m.bank.b"></b><small data-i18n="c1.m.bank.s"></small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="db" data-i18n-text="c1.m.db.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b>PostgreSQL</b><small data-i18n="c1.m.db.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="sso" data-i18n-text="c1.m.sso.x"><span class="led"></span><b data-i18n="c1.m.sso.b"></b><small data-i18n="c1.m.sso.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="exam" data-i18n-text="c1.m.exam.x"><span class="led"></span><b data-i18n="c1.m.exam.b"></b><small>Django 5.2 · Datastar · SSE</small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="bank" data-i18n-text="c1.m.bank.x"><span class="led"></span><b data-i18n="c1.m.bank.b"></b><small data-i18n="c1.m.bank.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="db" data-i18n-text="c1.m.db.x"><span class="led"></span><b>PostgreSQL</b><small data-i18n="c1.m.db.s"></small></button>
             </div>
             <div class="readout"><span aria-hidden="true"><span class="p">›</span><span class="tx" data-i18n="c1.ready"></span> <span class="cur"></span></span><span class="sr-only live" aria-live="polite" data-i18n="c1.ready"></span></div>
           </div>
@@ -554,13 +589,13 @@ footer a { color: var(--rg-cream); }
             <div class="rhead"><span data-i18n="c2.rack"></span><span data-i18n="c2.state"></span></div>
             <div class="bay" data-links="m1-m2,m2-m3,m3-m4,m5-m6,m6-m7">
               <svg class="cables" aria-hidden="true"></svg>
-              <button class="mod" type="button" aria-pressed="false" data-id="m1" data-i18n-text="c2.m1.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b>#34848</b><small data-i18n="c2.m1.s"></small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="m2" data-i18n-text="c2.m2.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b>#34859</b><small data-i18n="c2.m2.s"></small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="m3" data-i18n-text="c2.m3.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b>#36969</b><small data-i18n="c2.m3.s"></small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="m4" data-i18n-text="c2.m4.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b>#36970</b><small data-i18n="c2.m4.s"></small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="m5" data-i18n-text="c2.m5.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b>banner #445</b><small data-i18n="c2.m5.s"></small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="m6" data-i18n-text="c2.m6.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b>enterprise #2488</b><small data-i18n="c2.m6.s"></small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="m7" data-i18n-text="c2.m7.x"><span class="led amber"></span><span class="jacks"><span class="jack"></span></span><b>authoring #2749</b><small data-i18n="c2.m7.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="m1" data-i18n-text="c2.m1.x"><span class="led"></span><b>#34848</b><small data-i18n="c2.m1.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="m2" data-i18n-text="c2.m2.x"><span class="led"></span><b>#34859</b><small data-i18n="c2.m2.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="m3" data-i18n-text="c2.m3.x"><span class="led"></span><b>#36969</b><small data-i18n="c2.m3.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="m4" data-i18n-text="c2.m4.x"><span class="led"></span><b>#36970</b><small data-i18n="c2.m4.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="m5" data-i18n-text="c2.m5.x"><span class="led"></span><b>banner #445</b><small data-i18n="c2.m5.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="m6" data-i18n-text="c2.m6.x"><span class="led"></span><b>enterprise #2488</b><small data-i18n="c2.m6.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="m7" data-i18n-text="c2.m7.x"><span class="led amber"></span><b>authoring #2749</b><small data-i18n="c2.m7.s"></small></button>
             </div>
             <div class="readout"><span aria-hidden="true"><span class="p">›</span><span class="tx" data-i18n="c2.ready"></span> <span class="cur"></span></span><span class="sr-only live" aria-live="polite" data-i18n="c2.ready"></span></div>
           </div>
@@ -591,12 +626,12 @@ footer a { color: var(--rg-cream); }
             <div class="rhead"><span data-i18n="c3.rack"></span><span data-i18n="c3.state"></span></div>
             <div class="bay" data-links="studio-llm,grader-llm,llm-kb,qdrant-llm,mcp-studio">
               <svg class="cables" aria-hidden="true"></svg>
-              <button class="mod" type="button" aria-pressed="false" data-id="studio" data-i18n-text="c3.m.studio.x"><span class="led"></span><span class="jacks"><span class="jack"></span><span class="jack"></span></span><b data-i18n="c3.m.studio.b"></b><small>React · plugin slots</small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="llm" data-i18n-text="c3.m.llm.x"><span class="led"></span><span class="jacks"><span class="jack"></span><span class="jack"></span></span><b data-i18n="c3.m.llm.b"></b><small>OpenAI · Gemini</small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="grader" data-i18n-text="c3.m.grader.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b data-i18n="c3.m.grader.b"></b><small data-i18n="c3.m.grader.s"></small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="kb" data-i18n-text="c3.m.kb.x"><span class="led"></span><span class="jacks"><span class="jack"></span><span class="jack"></span></span><b data-i18n="c3.m.kb.b"></b><small data-i18n="c3.m.kb.s"></small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="mcp" data-i18n-text="c3.m.mcp.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b data-i18n="c3.m.mcp.b"></b><small data-i18n="c3.m.mcp.s"></small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="qdrant" data-i18n-text="c3.m.qdrant.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b>Qdrant</b><small data-i18n="c3.m.qdrant.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="studio" data-i18n-text="c3.m.studio.x"><span class="led"></span><b data-i18n="c3.m.studio.b"></b><small>React · plugin slots</small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="llm" data-i18n-text="c3.m.llm.x"><span class="led"></span><b data-i18n="c3.m.llm.b"></b><small>OpenAI · Gemini</small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="grader" data-i18n-text="c3.m.grader.x"><span class="led"></span><b data-i18n="c3.m.grader.b"></b><small data-i18n="c3.m.grader.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="kb" data-i18n-text="c3.m.kb.x"><span class="led"></span><b data-i18n="c3.m.kb.b"></b><small data-i18n="c3.m.kb.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="mcp" data-i18n-text="c3.m.mcp.x"><span class="led"></span><b data-i18n="c3.m.mcp.b"></b><small data-i18n="c3.m.mcp.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="qdrant" data-i18n-text="c3.m.qdrant.x"><span class="led"></span><b>Qdrant</b><small data-i18n="c3.m.qdrant.s"></small></button>
             </div>
             <div class="readout"><span aria-hidden="true"><span class="p">›</span><span class="tx" data-i18n="c3.ready"></span> <span class="cur"></span></span><span class="sr-only live" aria-live="polite" data-i18n="c3.ready"></span></div>
           </div>
@@ -620,12 +655,12 @@ footer a { color: var(--rg-cream); }
             <div class="rhead"><span data-i18n="c4.rack"></span><span data-i18n="c4.state"></span></div>
             <div class="bay" data-links="lib-studio,studio-diag,diag-flow,flow-upload,upload-office">
               <svg class="cables" aria-hidden="true"></svg>
-              <button class="mod" type="button" aria-pressed="false" data-id="lib" data-step="0" data-i18n-text="c4.m.lib.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b data-i18n="c4.m.lib.b"></b><small data-i18n="c4.m.lib.s"></small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="studio" data-step="0" data-i18n-text="c4.m.studio.x"><span class="led"></span><span class="jacks"><span class="jack"></span><span class="jack"></span></span><b data-i18n="c4.m.studio.b"></b><small data-i18n="c4.m.studio.s"></small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="diag" data-step="1" data-i18n-text="c4.m.diag.x"><span class="led"></span><span class="jacks"><span class="jack"></span><span class="jack"></span></span><b data-i18n="c4.m.diag.b"></b><small data-i18n="c4.m.diag.s"></small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="flow" data-step="2" data-i18n-text="c4.m.flow.x"><span class="led"></span><span class="jacks"><span class="jack"></span><span class="jack"></span></span><b data-i18n="c4.m.flow.b"></b><small data-i18n="c4.m.flow.s"></small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="upload" data-step="3" data-i18n-text="c4.m.upload.x"><span class="led"></span><span class="jacks"><span class="jack"></span><span class="jack"></span></span><b data-i18n="c4.m.upload.b"></b><small>XBlock</small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="office" data-step="3" data-i18n-text="c4.m.office.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b data-i18n="c4.m.office.b"></b><small data-i18n="c4.m.office.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="lib" data-step="0" data-i18n-text="c4.m.lib.x"><span class="led"></span><b data-i18n="c4.m.lib.b"></b><small data-i18n="c4.m.lib.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="studio" data-step="0" data-i18n-text="c4.m.studio.x"><span class="led"></span><b data-i18n="c4.m.studio.b"></b><small data-i18n="c4.m.studio.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="diag" data-step="1" data-i18n-text="c4.m.diag.x"><span class="led"></span><b data-i18n="c4.m.diag.b"></b><small data-i18n="c4.m.diag.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="flow" data-step="2" data-i18n-text="c4.m.flow.x"><span class="led"></span><b data-i18n="c4.m.flow.b"></b><small data-i18n="c4.m.flow.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="upload" data-step="3" data-i18n-text="c4.m.upload.x"><span class="led"></span><b data-i18n="c4.m.upload.b"></b><small>XBlock</small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="office" data-step="3" data-i18n-text="c4.m.office.x"><span class="led"></span><b data-i18n="c4.m.office.b"></b><small data-i18n="c4.m.office.s"></small></button>
             </div>
             <div class="readout"><span aria-hidden="true"><span class="p">›</span><span class="tx" data-i18n="c4.ready"></span> <span class="cur"></span></span><span class="sr-only live" aria-live="polite" data-i18n="c4.ready"></span></div>
           </div>
@@ -652,12 +687,12 @@ footer a { color: var(--rg-cream); }
             <div class="rhead"><span data-i18n="c5.rack"></span><span data-i18n="c5.state"></span></div>
             <div class="bay" data-links="lms-celery,celery-game,game-db,game-board,avatars-board">
               <svg class="cables" aria-hidden="true"></svg>
-              <button class="mod" type="button" aria-pressed="false" data-id="lms" data-score="1" data-i18n-text="c5.m.lms.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b data-i18n="c5.m.lms.b"></b><small>Open edX</small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="celery" data-i18n-text="c5.m.celery.x"><span class="led"></span><span class="jacks"><span class="jack"></span><span class="jack"></span></span><b>Celery</b><small data-i18n="c5.m.celery.s"></small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="game" data-score="1" data-i18n-text="c5.m.game.x"><span class="led"></span><span class="jacks"><span class="jack"></span><span class="jack"></span></span><b data-i18n="c5.m.game.b"></b><small data-i18n="c5.m.game.s"></small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="db" data-i18n-text="c5.m.db.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b>MySQL</b><small data-i18n="c5.m.db.s"></small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="board" data-score="1" data-i18n-text="c5.m.board.x"><span class="led"></span><span class="jacks"><span class="jack"></span><span class="jack"></span></span><b data-i18n="c5.m.board.b"></b><small data-i18n="c5.m.board.s"></small></button>
-              <button class="mod" type="button" aria-pressed="false" data-id="avatars" data-i18n-text="c5.m.avatars.x"><span class="led"></span><span class="jacks"><span class="jack"></span></span><b data-i18n="c5.m.avatars.b"></b><small>DRF</small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="lms" data-score="1" data-i18n-text="c5.m.lms.x"><span class="led"></span><b data-i18n="c5.m.lms.b"></b><small>Open edX</small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="celery" data-i18n-text="c5.m.celery.x"><span class="led"></span><b>Celery</b><small data-i18n="c5.m.celery.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="game" data-score="1" data-i18n-text="c5.m.game.x"><span class="led"></span><b data-i18n="c5.m.game.b"></b><small data-i18n="c5.m.game.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="db" data-i18n-text="c5.m.db.x"><span class="led"></span><b>MySQL</b><small data-i18n="c5.m.db.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="board" data-score="1" data-i18n-text="c5.m.board.x"><span class="led"></span><b data-i18n="c5.m.board.b"></b><small data-i18n="c5.m.board.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="avatars" data-i18n-text="c5.m.avatars.x"><span class="led"></span><b data-i18n="c5.m.avatars.b"></b><small>DRF</small></button>
             </div>
             <div class="readout"><span aria-hidden="true"><span class="p">›</span><span class="tx" data-i18n="c5.ready"></span> <span class="cur"></span></span><span class="sr-only live" aria-live="polite" data-i18n="c5.ready"></span></div>
           </div>
@@ -716,6 +751,7 @@ footer a { color: var(--rg-cream); }
   const T = JSON.parse(document.getElementById("t").textContent);
   const lang = root.lang;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  root.classList.add("js");
   if (!reduce) root.classList.add("motion");
 
   // language links keep the current section
@@ -801,19 +837,86 @@ footer a { color: var(--rg-cream); }
   }
 
   // rack cables
+  // Cables run like circuit traces: up from a port on a module's top edge into the gap above it,
+  // along the gaps, and down into the other module's port. Right angles only, never over a module;
+  // cables sharing a gap each get their own lane, so they can cross but never overlap.
+  const LANE = 6, CLEAR = 10; // px between lanes; lowest lane above the ports on the modules below it
   function draw(bay, active, plug) {
-    const svg = bay.querySelector("svg.cables"), r = bay.getBoundingClientRect();
-    if (!r.width) return;
+    const svg = bay.querySelector("svg.cables");
+    if (!bay.getBoundingClientRect().width) return;
+    const measure = () => {
+      const r = bay.getBoundingClientRect(), box = {};
+      bay.querySelectorAll(".mod").forEach(m => { const b = m.getBoundingClientRect(); box[m.dataset.id] = { l: b.left - r.left, r: b.right - r.left, t: b.top - r.top }; });
+      return { r, box };
+    };
+    // 1. which ducts each cable needs: the gap above a row ("h" + row number) and a vertical channel
+    //    ("L" left of the first column for cables inside it, "M" between the columns for the rest)
+    Object.assign(bay.style, { paddingTop: "", paddingLeft: "", rowGap: "", columnGap: "" });
+    let { r, box } = measure();
+    const tops = [...new Set(Object.values(box).map(b => Math.round(b.t)))].sort((p, q) => p - q);
+    const row = id => tops.indexOf(Math.round(box[id].t)), firstCol = id => box[id].l <= Math.min(...Object.values(box).map(b => b.l)) + 1;
+    const links = bay.dataset.links.split(",").map(p => p.split("-"));
+    const routes = links.map(([a, b]) => {
+      const ducts = ["h" + row(a)];
+      if (row(a) !== row(b)) ducts.push("h" + row(b), firstCol(a) && firstCol(b) ? "L" : "M");
+      return { a, b, ducts };
+    });
+    const count = d => routes.filter(rt => rt.ducts.includes(d)).length;
+    // 2. widen each duct to fit its lanes (the CSS sizes are the minimum)
+    const cs = getComputedStyle(bay), px = v => parseFloat(v) + "px";
+    const rowNeed = Math.max(0, ...tops.slice(1).map((_, k) => count("h" + (k + 1))));
+    Object.assign(bay.style, {
+      paddingTop: px(Math.max(parseFloat(cs.paddingTop), CLEAR + 4 + count("h0") * LANE)),
+      rowGap: px(Math.max(parseFloat(cs.rowGap), CLEAR + 4 + rowNeed * LANE)),
+      paddingLeft: px(Math.max(parseFloat(cs.paddingLeft), 8 + count("L") * LANE)),
+      columnGap: px(Math.max(parseFloat(cs.columnGap), 8 + count("M") * LANE)),
+    });
+    ({ r, box } = measure());
     svg.setAttribute("viewBox", `0 0 ${r.width} ${r.height}`);
-    svg.innerHTML = bay.dataset.links.split(",").map((pair, i) => {
-      const [a, b] = pair.split("-");
-      const ja = bay.querySelector(`[data-id="${a}"] .jack:last-child`).getBoundingClientRect();
-      const jb = bay.querySelector(`[data-id="${b}"] .jack`).getBoundingClientRect();
-      const x1 = ja.left - r.left + 7, y1 = ja.top - r.top + 7, x2 = jb.left - r.left + 7, y2 = jb.top - r.top + 7;
-      const sag = 40 + Math.abs(x2 - x1) * .1 + Math.abs(y2 - y1) * .15;
-      const cls = (active && (a === active || b === active) ? "hot " : "") + (plug && !reduce ? "plug" : "");
-      return `<path data-a="${a}" data-b="${b}" class="${cls}" style="animation-delay:${i * .25}s" d="M${x1} ${y1} C${x1} ${y1 + sag} ${x2} ${y2 + sag} ${x2} ${y2}"/>`;
-    }).join("");
+    const all = Object.values(box), left = Math.min(...all.map(b => b.l));
+    const right = Math.min(...all.filter(b => b.l > left + 1).map(b => b.l)), leftEnd = Math.max(...all.filter(b => b.l <= left + 1).map(b => b.r));
+    const mid = { L: left / 2, M: (leftEnd + right) / 2 };
+    const rowTop = [...new Set(all.map(b => Math.round(b.t * 10) / 10))].sort((p, q) => p - q);
+    // 3. ports: one per cable end, spread along the top edge in link order
+    const ends = {};
+    links.forEach(([a, b], i) => { (ends[a] ||= []).push(i); (ends[b] ||= []).push(i); });
+    const port = (id, i) => ({ x: box[id].l + 18 + ends[id].indexOf(i) * 16, y: box[id].t });
+    routes.forEach((rt, i) => {
+      rt.pa = port(rt.a, i); rt.pb = port(rt.b, i);
+      // the horizontal run each cable draws in each row gap
+      const xc = rt.ducts[2] ? mid[rt.ducts[2]] : rt.pb.x;
+      rt.run = { [rt.ducts[0]]: Math.abs(rt.pa.x - xc) };
+      if (rt.ducts[1]) rt.run[rt.ducts[1]] = Math.abs(rt.pb.x - xc);
+    });
+    // 4. lanes: in a row gap the shortest runs sit lowest, so risers cross as few cables as possible
+    const lanes = {};
+    routes.forEach(rt => rt.ducts.forEach(d => (lanes[d] ||= []).push(rt)));
+    Object.entries(lanes).forEach(([d, list]) => { if (d[0] === "h") list.sort((p, q) => p.run[d] - q.run[d]); });
+    const laneAt = (d, rt) => {
+      const list = lanes[d], k = list.indexOf(rt);
+      if (d[0] === "h") return rowTop[+d.slice(1)] - CLEAR - k * LANE;
+      return mid[d] + (k - (list.length - 1) / 2) * LANE;
+    };
+    const pts = rt => {
+      const { pa, pb } = rt, ya = laneAt(rt.ducts[0], rt);
+      if (rt.ducts.length === 1) return [pa, { x: pa.x, y: ya }, { x: pb.x, y: ya }, pb];
+      const yb = laneAt(rt.ducts[1], rt), xc = laneAt(rt.ducts[2], rt);
+      return [pa, { x: pa.x, y: ya }, { x: xc, y: ya }, { x: xc, y: yb }, { x: pb.x, y: yb }, pb];
+    };
+    // polyline with small rounded corners (still reads as a right angle)
+    const d = p => p.reduce((s, c, i) => {
+      if (i === 0) return `M${c.x} ${c.y}`;
+      if (i === p.length - 1) return s + ` L${c.x} ${c.y}`;
+      const a = p[i - 1], b = p[i + 1], ra = Math.min(4, Math.hypot(c.x - a.x, c.y - a.y) / 2), rb = Math.min(4, Math.hypot(b.x - c.x, b.y - c.y) / 2);
+      const ux = Math.sign(c.x - a.x), uy = Math.sign(c.y - a.y), vx = Math.sign(b.x - c.x), vy = Math.sign(b.y - c.y);
+      return s + ` L${c.x - ux * ra} ${c.y - uy * ra} Q${c.x} ${c.y} ${c.x + vx * rb} ${c.y + vy * rb}`;
+    }, "");
+    const hot = rt => active && (rt.a === active || rt.b === active);
+    svg.innerHTML = routes.map((rt, i) =>
+      `<path data-l="${i}" data-a="${rt.a}" data-b="${rt.b}" class="${(hot(rt) ? "hot " : "") + (plug && !reduce ? "plug" : "")}" style="animation-delay:${i * .25}s" d="${d(pts(rt))}"/>`
+    ).join("") + routes.map((rt, i) =>
+      [rt.pa, rt.pb].map(p => `<circle data-l="${i}" class="port${hot(rt) ? " hot" : ""}" r="5" cx="${p.x}" cy="${p.y}"/>`).join("")
+    ).join("");
     svg.querySelectorAll("path").forEach(p => p.style.setProperty("--len", p.getTotalLength()));
   }
   function pulse(bay, id) {
@@ -821,16 +924,17 @@ footer a { color: var(--rg-cream); }
     const svg = bay.querySelector("svg.cables");
     svg.querySelectorAll(`path[data-a="${id}"], path[data-b="${id}"]`).forEach(p => {
       const L = p.getTotalLength(), fwd = p.dataset.a === id, c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      c.setAttribute("r", 6); svg.appendChild(c); const t0 = performance.now();
+      c.setAttribute("r", 4); c.setAttribute("class", "sig"); svg.appendChild(c); const t0 = performance.now();
       (function step(t) { const k = Math.min(1, (t - t0) / 700); const pt = p.getPointAtLength((fwd ? k : 1 - k) * L); c.setAttribute("cx", pt.x); c.setAttribute("cy", pt.y); if (k < 1) requestAnimationFrame(step); else c.remove(); })(t0);
     });
   }
   // readout prints word by word, like a streaming model reply; screen readers get the
   // whole sentence once through a separate live region (the typed copy is aria-hidden)
-  function type(out, text) {
+  function type(out, text, live = out.querySelector(".live")) {
     const tx = out.querySelector(".tx"); clearInterval(out._t);
-    out.querySelector(".live").textContent = text;
-    if (reduce || root.classList.contains("paused")) { tx.textContent = text; return; }
+    live.textContent = text;
+    // only reduced motion skips typing; the pause button is for ambient motion, and typing follows the visitor's own click
+    if (reduce) { tx.textContent = text; return; }
     const words = text.split(" "); let i = 0; tx.textContent = "";
     out._t = setInterval(() => { tx.textContent += (i ? " " : "") + words[i++]; if (i >= words.length) clearInterval(out._t); }, 45);
   }
@@ -870,8 +974,10 @@ footer a { color: var(--rg-cream); }
       if (m.dataset.score) score(panel.querySelector(".board"));
     }));
   });
-  addEventListener("resize", () => bays.forEach(b => draw(b)));
-  document.fonts.ready.then(() => bays.forEach(b => draw(b)));
+  // redraws keep the selected module's cables and ports highlighted
+  const selected = bay => bay.querySelector('.mod[aria-pressed="true"]')?.dataset.id;
+  addEventListener("resize", () => bays.forEach(b => draw(b, selected(b))));
+  document.fonts.ready.then(() => bays.forEach(b => draw(b, selected(b))));
 
   // reveal, count-up and rack power-on when scrolled into view
   const io = new IntersectionObserver(es => es.forEach(e => {
@@ -880,7 +986,7 @@ footer a { color: var(--rg-cream); }
     el.classList.add("seen");
     if (el.matches("[data-count]")) countUp(el);
     if (el.classList.contains("metric")) { el.querySelector(".live").classList.add("on"); countUp(el.querySelector("[data-count]")); }
-    if (el.classList.contains("rack") && !el.classList.contains("lit")) { el.classList.add("lit"); draw(el.querySelector(".bay"), null, true); }
+    if (el.classList.contains("rack") && !el.classList.contains("lit")) { el.classList.add("lit"); draw(el.querySelector(".bay"), selected(el), true); }
     io.unobserve(el);
   }), { threshold: .2 });
   document.querySelectorAll(".reveal, .metric, .rack, .nums b").forEach(el => io.observe(el));
@@ -903,7 +1009,7 @@ footer a { color: var(--rg-cream); }
     tabs.forEach(x => { const on = x === t; x.setAttribute("aria-selected", String(on)); x.tabIndex = on ? 0 : -1; document.getElementById(x.getAttribute("aria-controls")).hidden = !on; });
     if (focus) t.focus();
     const panel = document.getElementById(t.getAttribute("aria-controls")), rack = panel.querySelector(".rack");
-    requestAnimationFrame(() => { rack.classList.add("lit"); draw(rack.querySelector(".bay"), null, true); });
+    requestAnimationFrame(() => { rack.classList.add("lit"); draw(rack.querySelector(".bay"), selected(rack), true); });
     panel.querySelectorAll(".nums b").forEach(b => { delete b.dataset.done; countUp(b); });
   }
   tabs.forEach((t, i) => {
@@ -920,7 +1026,54 @@ footer a { color: var(--rg-cream); }
     const open = areas.classList.toggle("all");
     showall.setAttribute("aria-expanded", String(open));
     lbl.textContent = open ? T.showFewer : T.showAll;
+    if (!open && tile && tile.closest(".more")) openTile(null);
   });
+
+  // experience tiles → what I did there: typed in the pinned left column, or under the tile on phones
+  const expOut = document.getElementById("exp-out"), expLive = document.getElementById("exp-live"), expHint = expOut.querySelector(".tx").textContent;
+  const tileBtns = [...document.querySelectorAll(".area-btn")], narrow = matchMedia("(max-width: 900px)");
+  const expSide = expOut.parentElement;
+  let tile = null;
+  // on a short window the pinned column can be taller than the screen: pin it higher so the text's end stays visible
+  function fitSide() {
+    expSide.style.top = "";
+    const top = parseFloat(getComputedStyle(expSide).top), over = top + expSide.offsetHeight + 16 - innerHeight;
+    if (over > 0) expSide.style.top = (top - over) + "px";
+  }
+  // reserve the open text's full height (so typing never moves the page), then fit the pinned column
+  function reserve() {
+    expOut.style.minHeight = "";
+    if (tile) {
+      const tx = expOut.querySelector(".tx"), typed = tx.textContent;
+      tx.textContent = tile.dataset.text; expOut.style.minHeight = expOut.offsetHeight + "px"; tx.textContent = typed;
+    }
+    fitSide();
+  }
+  function placeOut() {
+    if (narrow.matches && tile) tile.closest(".area").after(expOut);
+    else if (expOut.nextElementSibling !== expLive) expLive.before(expOut);
+  }
+  function openTile(b) {
+    tile = b;
+    tileBtns.forEach(x => { x.setAttribute("aria-pressed", String(x === b)); x.closest(".area").classList.toggle("on", x === b); });
+    expOut.classList.toggle("open", !!b);
+    placeOut();
+    if (!b) { clearInterval(expOut._t); expOut.querySelector(".tx").textContent = expHint; expLive.textContent = ""; reserve(); return; }
+    expOut.querySelector(".rh").textContent = b.closest(".area").querySelector(".yr").textContent + " · " + b.textContent;
+    reserve();
+    type(expOut, b.dataset.text, expLive);
+    expOut.scrollIntoView({ block: "nearest", behavior: reduce ? "instant" : "smooth" });
+  }
+  tileBtns.forEach(b => {
+    b.addEventListener("click", () => openTile(b === tile ? null : b));
+    // the rest of the tile acts as the button too, unless the click ends a text selection
+    b.closest(".area").addEventListener("click", e => { if (!e.target.closest(".area-btn") && !String(getSelection())) b.click(); });
+  });
+  addEventListener("keydown", e => { if (e.key === "Escape" && tile) openTile(null); });
+  // a new width can cross the phone breakpoint and changes the text's height: move, re-measure, refit.
+  // (phones also fire resize when the address bar hides; then only the column fit can change)
+  let expW = innerWidth;
+  addEventListener("resize", () => { if (innerWidth !== expW) { expW = innerWidth; placeOut(); reserve(); } else fitSide(); });
 
   // skills → where used
   const used = document.getElementById("used"), chips = document.querySelectorAll(".chip");

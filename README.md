@@ -21,9 +21,16 @@ python3 -m http.server 8080 --bind 127.0.0.1 -d ../dist   # serve dist/ (another
 npm run check                                    # browser + axe checks against the served dist/
 ```
 
-**Deploying:** `dist/` is build output and is not committed. The build needs Chromium
-(for the PDFs), so it runs in GitHub Actions, which then uploads `dist/` to Cloudflare Pages.
-The public address is set once in `prototype/tools/build.mjs` (`SITE`).
+Stop the server with `Ctrl+C`. There is no live reload: after editing, run `npm run build`
+again and refresh the browser.
+
+**Deploying:** live at [kyrylo-kireiev.dev](https://kyrylo-kireiev.dev). `dist/` is build
+output and is not committed. [GitHub Actions](.github/workflows/deploy.yml) runs the tests,
+the build and all browser checks on every pull request; after a merge to `main` it does the
+same and then deploys `dist/` to a Cloudflare Worker ([`wrangler.jsonc`](wrangler.jsonc)).
+It needs two repository secrets: `CLOUDFLARE_API_TOKEN` (template "Edit Cloudflare Workers")
+and `CLOUDFLARE_ACCOUNT_ID`. The public address is set once in
+`prototype/tools/build.mjs` (`SITE`).
 
 **Known gap:** the page uses inline scripts and styles, so a strict Content Security Policy
 would need hashes. Planned for the Astro build, together with security headers.
@@ -56,7 +63,8 @@ and registering it in one place — no component changes. See the
 
 ## Commands
 
-Available once the site is scaffolded (Node 22, see `.nvmrc`):
+For the planned Astro build only; they do not exist yet. For the current site use the v0
+commands above. (Node 22, see `.nvmrc`):
 
 ```bash
 npm run dev      # local dev server
