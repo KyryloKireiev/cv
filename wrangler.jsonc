@@ -1,0 +1,17 @@
+// Cloudflare Worker "cv": serves the built site as static files (no Worker code).
+// Deployed by .github/workflows/deploy.yml once the build and all checks pass.
+{
+  "name": "cv",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./prototype/dist",
+    "not_found_handling": "404-page"
+  },
+  // the main address first; cv. stays as a second entrance (canonical links point to the main one)
+  "routes": [
+    { "pattern": "kyrylo-kireiev.dev", "custom_domain": true },
+    { "pattern": "cv.kyrylo-kireiev.dev", "custom_domain": true }
+  ],
+  // no extra *.workers.dev copy of the site
+  "workers_dev": false
+}
