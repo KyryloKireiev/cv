@@ -1,0 +1,8 @@
+{
+  "name": "cv-deploy",
+  "private": true,
+  "description": "Only the Cloudflare deploy tool, locked, used by the deploy step in .github/workflows/deploy.yml",
+  "devDependencies": {
+    "wrangler": "4.148.0"
+  }
+}

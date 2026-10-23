@@ -83,11 +83,16 @@ for (const [code, path] of LOCALES) {
   const nonePressed = () => page.$$eval(btns, (bs) => bs.every((b) => b.getAttribute("aria-pressed") === "false"));
   ok((await page.$$(btns)).length === 10 && (await nonePressed()), `${code}: expected 10 tile buttons, none pressed`);
   ok((await page.textContent("#exp-out .tx")).trim() === pick, `${code}: tile readout should start with the hint "${pick}"`);
+  const selectable = await page.$eval("#areas .area p", (el) => { const r = el.getBoundingClientRect(); return document.elementFromPoint(r.left + 4, r.top + r.height / 2) === el; });
+  ok(selectable, `${code}: a tile's description is covered by its button, so its text cannot be selected`);
   const tile0 = await page.locator("#areas .area").first().boundingBox();
   await page.click("#areas .area >> nth=0", { position: { x: 16, y: tile0.height - 10 } }); // the whole tile is clickable, not only its title
   ok((await page.getAttribute(`${btns} >> nth=0`, "aria-pressed")) === "true" && (await page.textContent("#exp-live")) === exam, `${code}: clicking a tile did not select it or announce its text`);
+  const typingH = await page.$eval("#exp-out", (o) => o.getBoundingClientRect().height);
   await page.waitForFunction((w) => document.querySelector("#exp-out .tx").textContent === w, exam, { timeout: 8000 }).catch(() => {});
   ok((await page.textContent("#exp-out .tx")) === exam, `${code}: tile text was not typed out in full`);
+  const typedH = await page.$eval("#exp-out", (o) => o.getBoundingClientRect().height);
+  ok(Math.abs(typedH - typingH) < 1, `${code}: tile text box grows while typing (${typingH}px → ${typedH}px), so the page jumps`);
   const beside = await page.evaluate(() => {
     const o = document.getElementById("exp-out").getBoundingClientRect(), a = document.querySelector("#areas .area").getBoundingClientRect();
     return o.width > 0 && o.right <= a.left && o.top >= 0 && o.bottom <= innerHeight;
@@ -135,7 +140,7 @@ for (const [code, path] of LOCALES) {
       await p.goto(origin + path, { waitUntil: "networkidle" });
       ok((await p.getAttribute("html", "data-theme")) === theme, `${code} ${width} ${theme}: OS theme not followed`);
       await p.click("#showall"); await p.click("#areas .area-btn >> nth=0");
-      const axe =await new AxeBuilder({ page: p }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
+      const axe = await new AxeBuilder({ page: p }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
       for (const v of axe.violations) ok(false, `${code} ${width}px ${theme}: axe ${v.id} (${v.impact}) × ${v.nodes.length}: ${v.nodes[0].target.join(" ")}`);
       await c.close();
     }
@@ -163,6 +168,41 @@ for (const [code, path] of LOCALES) {
     });
     ok(under, `${code}: on phones the tile text should open under the tapped tile`);
     ok(!(await p.evaluate(() => document.documentElement.scrollWidth > innerWidth)), `${code}: horizontal scroll at 375px with tile text open`);
+    await p.keyboard.press("Escape");
+    ok(!(await p.isVisible("#exp-out")), `${code}: Esc did not close the tile text on phones`);
+    await p.click("#areas .area-btn >> nth=0"); await p.setViewportSize({ width: 1280, height: 800 });
+    const backInSide = await p.waitForFunction(() => {
+      const o = document.getElementById("exp-out");
+      return o.nextElementSibling?.id === "exp-live" && o.getBoundingClientRect().height > 0;
+    }, null, { timeout: 2000 }).then(() => true, () => false);
+    ok(backInSide, `${code}: open tile text did not move back to the side column when the window widened`);
+    await c.close();
+  }
+
+  // ---- a tile opened at the very bottom of the screen: its text scrolls into view ----
+  // fresh page with reduced motion, so no smooth scroll from earlier steps moves the start position
+  for (const [width, height] of [[375, 800], [1024, 640]]) {
+    const c = await browser.newContext({ viewport: { width, height }, reducedMotion: "reduce" }); const p = await c.newPage();
+    await p.goto(origin + path, { waitUntil: "networkidle" });
+    await p.$eval("#areas .area:nth-child(3)", (a) => a.scrollIntoView({ block: "end", behavior: "instant" }));
+    const start = await p.$eval("#areas .area:nth-child(3)", (a) => a.getBoundingClientRect().bottom - innerHeight);
+    ok(Math.abs(start) < 2, `${code}: test setup at ${width}×${height}: tile not at the bottom of the screen (off by ${start}px)`);
+    await p.focus("#areas .area-btn >> nth=2"); await p.keyboard.press("Enter");
+    const fits = await p.$eval("#exp-out", (o) => { const r = o.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight + 1; });
+    ok(fits, `${code}: text of a tile at the bottom of the screen opens off-screen at ${width}×${height}`);
+    await c.close();
+  }
+
+  // ---- short laptop window: the pinned column shifts up so the open text is never cut off ----
+  for (const [width, height] of [[1024, 640], [920, 700]]) {
+    const c = await browser.newContext({ viewport: { width, height }, reducedMotion: "reduce" }); const p = await c.newPage();
+    await p.goto(origin + path, { waitUntil: "networkidle" });
+    // the exam text is the longest; open it, then scroll on so the column is pinned
+    await p.click("#showall"); await p.click("#areas .area-btn >> nth=0");
+    await p.$eval("#areas .area:nth-child(7)", (a) => a.scrollIntoView({ block: "center", behavior: "instant" }));
+    const fits = await p.$eval("#exp-out", (o) => { const r = o.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight + 1; });
+    ok(fits, `${code}: pinned tile text is cut off at the bottom at ${width}×${height}`);
+    ok(!(await p.evaluate(() => document.documentElement.scrollWidth > innerWidth)), `${code}: horizontal scroll at ${width}px with tile text open`);
     await c.close();
   }
 

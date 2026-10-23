@@ -49,4 +49,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           WRANGLER_SEND_METRICS: "false"
-        run: npx --yes wrangler@4.148.0 deploy
+        # wrangler and everything it pulls in come from deploy/package-lock.json, never resolved fresh
+        run: |
+          npm ci --prefix deploy --no-audit --no-fund
+          deploy/node_modules/.bin/wrangler deploy

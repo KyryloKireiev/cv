@@ -174,10 +174,12 @@ h2 .acc { color: var(--accent-lg); }
 .exp-side { position: sticky; top: 96px; padding-right: 40px; }
 .exp-side .sec-head { display: block; margin-bottom: 0; }
 .exp-side .sec-head p { margin-top: 16px; font-size: 17px; }
-.exp-out { display: none; margin-top: 28px; padding: 14px 16px; min-height: 0; color: var(--rg-muted-on-dark); box-shadow: inset 0 0 0 1px var(--hairline-dark); clip-path: var(--clip-sm); overflow-wrap: anywhere; }
-.js .exp-out { display: block; }
+.exp-side h2 { hyphens: manual; } /* the narrow column would split the accent word ("ПРА-ЦЮЮ") */
+/* .readout.exp-out: must outrank the shared .readout rule further down */
+.readout.exp-out { display: none; margin-top: 28px; padding: 14px 16px; min-height: 0; color: var(--rg-muted-on-dark); box-shadow: inset 0 0 0 1px var(--hairline-dark); clip-path: var(--clip-sm); overflow-wrap: anywhere; }
+.js .readout.exp-out { display: block; }
 :root[data-theme="dark"] .exp-out { background: var(--rg-graphite); }
-.exp-out.open { color: var(--rg-cream); box-shadow: inset 0 0 0 1px var(--rg-peach); }
+.readout.exp-out.open { color: var(--rg-cream); box-shadow: inset 0 0 0 1px var(--rg-peach); }
 .exp-out .rh { display: none; gap: 8px; align-items: center; margin-bottom: 8px; font: 600 12px/1.3 var(--font-code); letter-spacing: .06em; text-transform: uppercase; color: var(--rg-peach); }
 .exp-out .rh::before { content: ""; flex: none; width: 8px; height: 8px; background: var(--rg-green); }
 .exp-out.open .rh { display: flex; }
@@ -195,11 +197,11 @@ h2 .acc { color: var(--accent-lg); }
 .areas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
 .area { background: var(--rg-graphite-800); box-shadow: inset 0 0 0 1px var(--hairline-dark); clip-path: var(--clip-sm); padding: 18px 20px 18px 24px; display: grid; gap: 4px; align-content: start; transition: transform .2s, box-shadow .2s; }
 .area:hover { transform: translateY(-3px); box-shadow: inset 0 0 0 1px var(--rg-peach); }
-.area { position: relative; cursor: pointer; }
+/* the title is the button (keyboard, screen readers); a click anywhere else on the tile is
+   passed to it by the script, so the description stays selectable */
+.area { cursor: pointer; }
 .area.on, .area:has(.area-btn:focus-visible) { box-shadow: inset 0 0 0 2px var(--rg-peach); }
-/* the title is the button; its ::after stretches over the whole tile so any click on it counts */
 .area-btn { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; text-align: left; cursor: pointer; }
-.area-btn::after { content: ""; position: absolute; inset: 0; }
 :root[data-theme="dark"] .band.dark .area { background: var(--rg-graphite); }
 .area .yr { font: 500 13px var(--font-code); color: var(--rg-peach); }
 .area h4 { margin: 0; font: 700 20px/1.2 var(--font-web); }
@@ -331,6 +333,10 @@ footer a { color: var(--rg-cream); }
 .motion .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s, transform .6s; }
 .motion .reveal.seen { opacity: 1; transform: none; }
 
+@media (max-width: 1080px) {
+  /* just above the phone layout the Ukrainian header is a hair too wide with classic scrollbars */
+  header.nav .wrap, nav.links { gap: 16px; }
+}
 @media (max-width: 900px) {
   nav.links { display: none; }
   .hero-grid, .case, .sec-head { grid-template-columns: minmax(0, 1fr); gap: 32px; }
@@ -338,8 +344,8 @@ footer a { color: var(--rg-cream); }
   .exp { grid-template-columns: minmax(0, 1fr); }
   .exp-side { position: static; padding-right: 0; margin-bottom: 48px; }
   /* phones: no side column, so the text opens under the tapped tile (moved there by the script) */
-  .js .exp-out:not(.open) { display: none; }
-  .areas > .exp-out { margin-top: 0; }
+  .js .readout.exp-out:not(.open) { display: none; }
+  .areas > .readout.exp-out { margin-top: 0; }
   .areas { grid-template-columns: 1fr; }
   .rack { position: static; }
   .tabs { position: static; }
@@ -953,7 +959,14 @@ footer a { color: var(--rg-cream); }
   // experience tiles → what I did there: typed in the pinned left column, or under the tile on phones
   const expOut = document.getElementById("exp-out"), expLive = document.getElementById("exp-live"), expHint = expOut.querySelector(".tx").textContent;
   const tileBtns = [...document.querySelectorAll(".area-btn")], narrow = matchMedia("(max-width: 900px)");
+  const expSide = expOut.parentElement;
   let tile = null;
+  // on a short window the pinned column can be taller than the screen: pin it higher so the text's end stays visible
+  function fitSide() {
+    expSide.style.top = "";
+    const top = parseFloat(getComputedStyle(expSide).top), over = top + expSide.offsetHeight + 16 - innerHeight;
+    if (over > 0) expSide.style.top = (top - over) + "px";
+  }
   function placeOut() {
     if (narrow.matches && tile) tile.closest(".area").after(expOut);
     else if (expOut.nextElementSibling !== expLive) expLive.before(expOut);
@@ -963,13 +976,25 @@ footer a { color: var(--rg-cream); }
     tileBtns.forEach(x => { x.setAttribute("aria-pressed", String(x === b)); x.closest(".area").classList.toggle("on", x === b); });
     expOut.classList.toggle("open", !!b);
     placeOut();
-    if (!b) { clearInterval(expOut._t); expOut.querySelector(".tx").textContent = expHint; expLive.textContent = ""; return; }
+    if (!b) { clearInterval(expOut._t); expOut.style.minHeight = ""; expOut.querySelector(".tx").textContent = expHint; expLive.textContent = ""; fitSide(); return; }
     expOut.querySelector(".rh").textContent = b.closest(".area").querySelector(".yr").textContent + " · " + b.textContent;
+    // reserve the full height first, so the page does not jump while the text types in
+    expOut.style.minHeight = ""; expOut.querySelector(".tx").textContent = b.dataset.text;
+    expOut.style.minHeight = expOut.offsetHeight + "px";
+    fitSide();
     type(expOut, b.dataset.text, expLive);
+    expOut.scrollIntoView({ block: "nearest", behavior: reduce ? "instant" : "smooth" });
   }
-  tileBtns.forEach(b => b.addEventListener("click", () => openTile(b === tile ? null : b)));
+  tileBtns.forEach(b => {
+    b.addEventListener("click", () => openTile(b === tile ? null : b));
+    // the rest of the tile acts as the button too, unless the click ends a text selection
+    b.closest(".area").addEventListener("click", e => { if (!e.target.closest(".area-btn") && !String(getSelection())) b.click(); });
+  });
   addEventListener("keydown", e => { if (e.key === "Escape" && tile) openTile(null); });
   narrow.addEventListener("change", placeOut);
+  // the reserved height only fits the old width (phones also fire resize when the address bar hides: ignore that)
+  let expW = innerWidth;
+  addEventListener("resize", () => { if (innerWidth !== expW) { expW = innerWidth; expOut.style.minHeight = ""; } fitSide(); });
 
   // skills → where used
   const used = document.getElementById("used"), chips = document.querySelectorAll(".chip");
