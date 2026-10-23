@@ -77,6 +77,34 @@ for (const [code, path] of LOCALES) {
   ok((await page.getAttribute("#p2 [data-id=m3]", "aria-pressed")) === "true", `${code}: module aria-pressed not set`);
   await page.click("#showall");
   ok((await page.$$eval("#areas .area", (as) => as.filter((a) => a.offsetParent).length)) === 10, `${code}: show-all did not reveal 10 areas`);
+
+  // ---- experience tiles: click → text typed beside the tiles; again, Esc or "show fewer" → closed ----
+  const btns = "#areas .area-btn", pick = dict[code]["exp.pick"], exam = dict[code]["area.exam.x"];
+  const nonePressed = () => page.$$eval(btns, (bs) => bs.every((b) => b.getAttribute("aria-pressed") === "false"));
+  ok((await page.$$(btns)).length === 10 && (await nonePressed()), `${code}: expected 10 tile buttons, none pressed`);
+  ok((await page.textContent("#exp-out .tx")).trim() === pick, `${code}: tile readout should start with the hint "${pick}"`);
+  const tile0 = await page.locator("#areas .area").first().boundingBox();
+  await page.click("#areas .area >> nth=0", { position: { x: 16, y: tile0.height - 10 } }); // the whole tile is clickable, not only its title
+  ok((await page.getAttribute(`${btns} >> nth=0`, "aria-pressed")) === "true" && (await page.textContent("#exp-live")) === exam, `${code}: clicking a tile did not select it or announce its text`);
+  await page.waitForFunction((w) => document.querySelector("#exp-out .tx").textContent === w, exam, { timeout: 8000 }).catch(() => {});
+  ok((await page.textContent("#exp-out .tx")) === exam, `${code}: tile text was not typed out in full`);
+  const beside = await page.evaluate(() => {
+    const o = document.getElementById("exp-out").getBoundingClientRect(), a = document.querySelector("#areas .area").getBoundingClientRect();
+    return o.width > 0 && o.right <= a.left && o.top >= 0 && o.bottom <= innerHeight;
+  });
+  ok(beside, `${code}: tile text is not visible to the left of the tiles at 1280px`);
+  await page.$eval("#areas .area:last-child", (a) => a.scrollIntoView({ block: "center", behavior: "instant" }));
+  const titleTop = await page.$eval("#experience h2", (h) => h.getBoundingClientRect().top);
+  ok(titleTop >= 64 && titleTop < 200, `${code}: section title is not pinned beside the last tile (top ${Math.round(titleTop)}px)`);
+  await page.click(`${btns} >> nth=0`);
+  ok((await nonePressed()) && (await page.textContent("#exp-out .tx")).trim() === pick, `${code}: clicking the open tile again did not close it`);
+  await page.focus(`${btns} >> nth=1`); await page.keyboard.press("Enter");
+  ok((await page.getAttribute(`${btns} >> nth=1`, "aria-pressed")) === "true", `${code}: Enter on a tile did not open it`);
+  await page.keyboard.press("Escape");
+  ok(await nonePressed(), `${code}: Esc did not close the tile text`);
+  await page.click(`${btns} >> nth=9`); await page.click("#showall");
+  ok(!(await page.$("#areas .area.on")) && (await nonePressed()), `${code}: hiding the open tile with "show fewer" left it open`);
+
   const hint = await page.textContent("#used");
   await page.click(".chip >> nth=8");
   ok((await page.textContent("#used")) !== hint, `${code}: skill chip did not update panel`);
@@ -106,8 +134,8 @@ for (const [code, path] of LOCALES) {
       const p = await c.newPage();
       await p.goto(origin + path, { waitUntil: "networkidle" });
       ok((await p.getAttribute("html", "data-theme")) === theme, `${code} ${width} ${theme}: OS theme not followed`);
-      await p.click("#showall");
-      const axe = await new AxeBuilder({ page: p }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
+      await p.click("#showall"); await p.click("#areas .area-btn >> nth=0");
+      const axe =await new AxeBuilder({ page: p }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
       for (const v of axe.violations) ok(false, `${code} ${width}px ${theme}: axe ${v.id} (${v.impact}) × ${v.nodes.length}: ${v.nodes[0].target.join(" ")}`);
       await c.close();
     }
@@ -120,6 +148,21 @@ for (const [code, path] of LOCALES) {
     ok(clipped === 0, `${code}: ${clipped} header/social element(s) cut off at ${width}px`);
     const names = await p.$$eval("header a, header button", (els) => els.filter((e) => e.offsetParent).map((e) => (e.getAttribute("aria-label") || e.textContent).trim()));
     ok(names.every(Boolean), `${code}: unnamed header control at ${width}px`);
+    await c.close();
+  }
+
+  // ---- phones: no tile hint until a tap, then the text opens right under the tapped tile ----
+  {
+    const c = await browser.newContext({ viewport: { width: 375, height: 800 } }); const p = await c.newPage();
+    await p.goto(origin + path, { waitUntil: "networkidle" });
+    ok(!(await p.isVisible("#exp-out")), `${code}: tile hint shown on phones before any tap`);
+    await p.click("#areas .area-btn >> nth=1");
+    const under = await p.evaluate(() => {
+      const o = document.getElementById("exp-out");
+      return o.previousElementSibling === document.querySelectorAll("#areas .area")[1] && o.getBoundingClientRect().height > 0;
+    });
+    ok(under, `${code}: on phones the tile text should open under the tapped tile`);
+    ok(!(await p.evaluate(() => document.documentElement.scrollWidth > innerWidth)), `${code}: horizontal scroll at 375px with tile text open`);
     await c.close();
   }
 
@@ -160,10 +203,13 @@ for (const [code, path] of LOCALES) {
   await rp.goto(origin + path, { waitUntil: "networkidle" });
   const hidden = await rp.$$eval(".reveal", (els) => els.filter((e) => getComputedStyle(e).opacity !== "1").length);
   ok(hidden === 0, `${code}: reduced motion leaves ${hidden} sections hidden`);
+  await rp.click("#areas .area-btn >> nth=0");
+  ok((await rp.textContent("#exp-out .tx")) === dict[code]["area.exam.x"], `${code}: with reduced motion the tile text should appear at once`);
   await rm.close();
   const nj = await browser.newContext({ javaScriptEnabled: false }); const np = await nj.newPage();
   await np.goto(origin + path);
   ok((await np.textContent("h2")).trim().length > 3 && (await np.textContent("#prod")).trim().length > 0, `${code}: content missing with JS off`);
+  ok(!(await np.isVisible("#exp-out")), `${code}: tile hint shown with JS off, where tiles cannot open`);
   await nj.close();
 
   console.log(`${code}: checked`);

@@ -169,8 +169,19 @@ h2 .acc { color: var(--accent-lg); }
 .sec-head p { margin: 0; }
 .band.dark .eyebrow, .band.dark .sec-head p { color: var(--rg-muted-on-dark); }
 
-/* experience */
-.timeline { position: relative; margin-left: 30%; padding-left: 40px; }
+/* experience: title and tile readout pinned in the left column while the tiles scroll past */
+.exp { display: grid; grid-template-columns: 30% minmax(0, 1fr); align-items: start; }
+.exp-side { position: sticky; top: 96px; padding-right: 40px; }
+.exp-side .sec-head { display: block; margin-bottom: 0; }
+.exp-side .sec-head p { margin-top: 16px; font-size: 17px; }
+.exp-out { display: none; margin-top: 28px; padding: 14px 16px; min-height: 0; color: var(--rg-muted-on-dark); box-shadow: inset 0 0 0 1px var(--hairline-dark); clip-path: var(--clip-sm); overflow-wrap: anywhere; }
+.js .exp-out { display: block; }
+:root[data-theme="dark"] .exp-out { background: var(--rg-graphite); }
+.exp-out.open { color: var(--rg-cream); box-shadow: inset 0 0 0 1px var(--rg-peach); }
+.exp-out .rh { display: none; gap: 8px; align-items: center; margin-bottom: 8px; font: 600 12px/1.3 var(--font-code); letter-spacing: .06em; text-transform: uppercase; color: var(--rg-peach); }
+.exp-out .rh::before { content: ""; flex: none; width: 8px; height: 8px; background: var(--rg-green); }
+.exp-out.open .rh { display: flex; }
+.timeline { position: relative; padding-left: 40px; }
 .timeline .rail { position: absolute; left: 0; top: 6px; bottom: 0; width: 2px; background: var(--hairline-dark); }
 .timeline .rail i { position: absolute; inset: 0 0 auto 0; height: 100%; background: var(--rg-peach); transform-origin: top; transform: scaleY(var(--p, 1)); }
 .job { position: relative; padding-bottom: 48px; }
@@ -184,6 +195,11 @@ h2 .acc { color: var(--accent-lg); }
 .areas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
 .area { background: var(--rg-graphite-800); box-shadow: inset 0 0 0 1px var(--hairline-dark); clip-path: var(--clip-sm); padding: 18px 20px 18px 24px; display: grid; gap: 4px; align-content: start; transition: transform .2s, box-shadow .2s; }
 .area:hover { transform: translateY(-3px); box-shadow: inset 0 0 0 1px var(--rg-peach); }
+.area { position: relative; cursor: pointer; }
+.area.on, .area:has(.area-btn:focus-visible) { box-shadow: inset 0 0 0 2px var(--rg-peach); }
+/* the title is the button; its ::after stretches over the whole tile so any click on it counts */
+.area-btn { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; text-align: left; cursor: pointer; }
+.area-btn::after { content: ""; position: absolute; inset: 0; }
 :root[data-theme="dark"] .band.dark .area { background: var(--rg-graphite); }
 .area .yr { font: 500 13px var(--font-code); color: var(--rg-peach); }
 .area h4 { margin: 0; font: 700 20px/1.2 var(--font-web); }
@@ -319,7 +335,11 @@ footer a { color: var(--rg-cream); }
   nav.links { display: none; }
   .hero-grid, .case, .sec-head { grid-template-columns: minmax(0, 1fr); gap: 32px; }
   .card h3 { font-size: 28px; }
-  .timeline { margin-left: 0; }
+  .exp { grid-template-columns: minmax(0, 1fr); }
+  .exp-side { position: static; padding-right: 0; margin-bottom: 48px; }
+  /* phones: no side column, so the text opens under the tapped tile (moved there by the script) */
+  .js .exp-out:not(.open) { display: none; }
+  .areas > .exp-out { margin-top: 0; }
   .areas { grid-template-columns: 1fr; }
   .rack { position: static; }
   .tabs { position: static; }
@@ -351,7 +371,8 @@ footer a { color: var(--rg-cream); }
   @page { size: A4; margin: 12mm 13mm 13mm; }
   :root { --bg: #fff; --surface: #fff; --fg: #323232; --muted: #6B6560; --accent-lg: #37604F; --accent: #37604F; --line: #EDE7E1; --card-edge: none; }
   body { font-size: 10.5pt; line-height: 1.35; background: #fff; }
-  header.nav, .skip, .wave-row, .rack, .tabs, .showall, .copy, .toast, .used, .band.green, .path, .board-wrap, .sec-head p, .metric .live, .rotor .slot { display: none !important; }
+  header.nav, .skip, .wave-row, .rack, .tabs, .showall, .copy, .toast, .used, .band.green, .path, .board-wrap, .sec-head p, .metric .live, .rotor .slot, .exp-out { display: none !important; }
+  .exp { display: block; } .exp-side { position: static; padding: 0; margin: 0; } .exp-side .sec-head { margin-bottom: 5pt; }
   .rotor-all { display: inline; position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; color: #37604F; }
   .wrap { max-width: none; padding: 0; }
   .hero { padding: 0; }
@@ -483,22 +504,27 @@ footer a { color: var(--rg-cream); }
   </div>
 
   <section class="band dark" id="experience">
-    <div class="wrap">
-      <div class="sec-head reveal"><div><div class="eyebrow" data-i18n="exp.eyebrow"></div><h2 data-i18n="exp.title"></h2></div><p data-i18n="exp.sub"></p></div>
+    <div class="wrap exp">
+      <div class="exp-side">
+        <div class="sec-head reveal"><div><div class="eyebrow" data-i18n="exp.eyebrow"></div><h2 data-i18n="exp.title"></h2></div><p data-i18n="exp.sub"></p></div>
+        <!-- typed copy for sighted users; screen readers get the whole text once from #exp-live -->
+        <div class="readout exp-out" id="exp-out" aria-hidden="true"><div class="rh"></div><span class="p">›</span><span class="tx" data-i18n="exp.pick"></span> <span class="cur"></span></div>
+        <p class="sr-only" id="exp-live" aria-live="polite"></p>
+      </div>
       <div class="timeline" id="timeline">
         <div class="rail" aria-hidden="true"><i></i></div>
         <div class="job reveal"><div class="row"><h3>Raccoon Gang</h3><span class="when" data-i18n="exp.rg.when"></span></div><div class="role" data-i18n="exp.rg.role"></div>
           <div class="areas" id="areas">
-            <div class="area"><span class="yr" data-i18n="area.exam.yr"></span><h4 data-i18n="area.exam.t"></h4><p data-i18n="area.exam.p"></p><div class="mini"><span>Odoo</span><span>Django</span><span>Datastar</span></div></div>
-            <div class="area"><span class="yr">2025–26</span><h4 data-i18n="area.ai.t"></h4><p data-i18n="area.ai.p"></p><div class="mini"><span>OpenAI</span><span>Gemini</span><span>Qdrant</span><span>MCP</span></div></div>
-            <div class="area"><span class="yr">2025</span><h4 data-i18n="area.auth.t"></h4><p data-i18n="area.auth.p"></p><div class="mini"><span>DRF</span><span>JWT</span><span>Celery</span><span>MinIO</span></div></div>
-            <div class="area"><span class="yr">2024–25</span><h4 data-i18n="area.game.t"></h4><p data-i18n="area.game.p"></p><div class="mini"><span>Django</span><span>MySQL</span><span>Celery</span></div></div>
-            <div class="area more"><span class="yr">2023–25</span><h4 data-i18n="area.adapt.t"></h4><p data-i18n="area.adapt.p"></p><div class="mini"><span>XBlocks</span><span>Studio</span></div></div>
-            <div class="area more"><span class="yr">2023–25</span><h4 data-i18n="area.mobile.t"></h4><p data-i18n="area.mobile.p"></p><div class="mini"><span>DRF</span><span>S3</span><span>Firebase</span></div></div>
-            <div class="area more"><span class="yr">2025</span><h4 data-i18n="area.access.t"></h4><p data-i18n="area.access.p"></p><div class="mini"><span>Django</span><span>Open edX</span></div></div>
-            <div class="area more"><span class="yr">2024–26</span><h4 data-i18n="area.fe.t"></h4><p data-i18n="area.fe.p"></p><div class="mini"><span>React</span><span>RTL</span><span>SCSS</span></div></div>
-            <div class="area more"><span class="yr">2024–26</span><h4 data-i18n="area.deploy.t"></h4><p data-i18n="area.deploy.p"></p><div class="mini"><span>Tutor</span><span>Docker</span><span>Sentry</span></div></div>
-            <div class="area more"><span class="yr">2023–26</span><h4 data-i18n="area.i18n.t"></h4><p data-i18n="area.i18n.p"></p><div class="mini"><span>i18n</span></div></div>
+            <div class="area"><span class="yr" data-i18n="area.exam.yr"></span><h4><button class="area-btn" type="button" aria-pressed="false" data-i18n="area.exam.t" data-i18n-text="area.exam.x"></button></h4><p data-i18n="area.exam.p"></p><div class="mini"><span>Odoo</span><span>Django</span><span>Datastar</span></div></div>
+            <div class="area"><span class="yr">2025–26</span><h4><button class="area-btn" type="button" aria-pressed="false" data-i18n="area.ai.t" data-i18n-text="area.ai.x"></button></h4><p data-i18n="area.ai.p"></p><div class="mini"><span>OpenAI</span><span>Gemini</span><span>Qdrant</span><span>MCP</span></div></div>
+            <div class="area"><span class="yr">2025</span><h4><button class="area-btn" type="button" aria-pressed="false" data-i18n="area.auth.t" data-i18n-text="area.auth.x"></button></h4><p data-i18n="area.auth.p"></p><div class="mini"><span>DRF</span><span>JWT</span><span>Celery</span><span>MinIO</span></div></div>
+            <div class="area"><span class="yr">2024–25</span><h4><button class="area-btn" type="button" aria-pressed="false" data-i18n="area.game.t" data-i18n-text="area.game.x"></button></h4><p data-i18n="area.game.p"></p><div class="mini"><span>Django</span><span>MySQL</span><span>Celery</span></div></div>
+            <div class="area more"><span class="yr">2023–25</span><h4><button class="area-btn" type="button" aria-pressed="false" data-i18n="area.adapt.t" data-i18n-text="area.adapt.x"></button></h4><p data-i18n="area.adapt.p"></p><div class="mini"><span>XBlocks</span><span>Studio</span></div></div>
+            <div class="area more"><span class="yr">2023–25</span><h4><button class="area-btn" type="button" aria-pressed="false" data-i18n="area.mobile.t" data-i18n-text="area.mobile.x"></button></h4><p data-i18n="area.mobile.p"></p><div class="mini"><span>DRF</span><span>S3</span><span>Firebase</span></div></div>
+            <div class="area more"><span class="yr">2025</span><h4><button class="area-btn" type="button" aria-pressed="false" data-i18n="area.access.t" data-i18n-text="area.access.x"></button></h4><p data-i18n="area.access.p"></p><div class="mini"><span>Django</span><span>Open edX</span></div></div>
+            <div class="area more"><span class="yr">2024–26</span><h4><button class="area-btn" type="button" aria-pressed="false" data-i18n="area.fe.t" data-i18n-text="area.fe.x"></button></h4><p data-i18n="area.fe.p"></p><div class="mini"><span>React</span><span>RTL</span><span>SCSS</span></div></div>
+            <div class="area more"><span class="yr">2024–26</span><h4><button class="area-btn" type="button" aria-pressed="false" data-i18n="area.deploy.t" data-i18n-text="area.deploy.x"></button></h4><p data-i18n="area.deploy.p"></p><div class="mini"><span>Tutor</span><span>Docker</span><span>Sentry</span></div></div>
+            <div class="area more"><span class="yr">2023–26</span><h4><button class="area-btn" type="button" aria-pressed="false" data-i18n="area.i18n.t" data-i18n-text="area.i18n.x"></button></h4><p data-i18n="area.i18n.p"></p><div class="mini"><span>i18n</span></div></div>
           </div>
           <button class="btn btn-sm showall" type="button" id="showall" aria-expanded="false" aria-controls="areas"><svg class="ico i-plus" aria-hidden="true"><use href="#i-plus"/></svg><svg class="ico i-minus" aria-hidden="true"><use href="#i-minus"/></svg><span id="showall-label" data-i18n="exp.showAll"></span></button>
         </div>
@@ -716,6 +742,7 @@ footer a { color: var(--rg-cream); }
   const T = JSON.parse(document.getElementById("t").textContent);
   const lang = root.lang;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  root.classList.add("js");
   if (!reduce) root.classList.add("motion");
 
   // language links keep the current section
@@ -827,9 +854,9 @@ footer a { color: var(--rg-cream); }
   }
   // readout prints word by word, like a streaming model reply; screen readers get the
   // whole sentence once through a separate live region (the typed copy is aria-hidden)
-  function type(out, text) {
+  function type(out, text, live = out.querySelector(".live")) {
     const tx = out.querySelector(".tx"); clearInterval(out._t);
-    out.querySelector(".live").textContent = text;
+    live.textContent = text;
     if (reduce || root.classList.contains("paused")) { tx.textContent = text; return; }
     const words = text.split(" "); let i = 0; tx.textContent = "";
     out._t = setInterval(() => { tx.textContent += (i ? " " : "") + words[i++]; if (i >= words.length) clearInterval(out._t); }, 45);
@@ -920,7 +947,29 @@ footer a { color: var(--rg-cream); }
     const open = areas.classList.toggle("all");
     showall.setAttribute("aria-expanded", String(open));
     lbl.textContent = open ? T.showFewer : T.showAll;
+    if (!open && tile && tile.closest(".more")) openTile(null);
   });
+
+  // experience tiles → what I did there: typed in the pinned left column, or under the tile on phones
+  const expOut = document.getElementById("exp-out"), expLive = document.getElementById("exp-live"), expHint = expOut.querySelector(".tx").textContent;
+  const tileBtns = [...document.querySelectorAll(".area-btn")], narrow = matchMedia("(max-width: 900px)");
+  let tile = null;
+  function placeOut() {
+    if (narrow.matches && tile) tile.closest(".area").after(expOut);
+    else if (expOut.nextElementSibling !== expLive) expLive.before(expOut);
+  }
+  function openTile(b) {
+    tile = b;
+    tileBtns.forEach(x => { x.setAttribute("aria-pressed", String(x === b)); x.closest(".area").classList.toggle("on", x === b); });
+    expOut.classList.toggle("open", !!b);
+    placeOut();
+    if (!b) { clearInterval(expOut._t); expOut.querySelector(".tx").textContent = expHint; expLive.textContent = ""; return; }
+    expOut.querySelector(".rh").textContent = b.closest(".area").querySelector(".yr").textContent + " · " + b.textContent;
+    type(expOut, b.dataset.text, expLive);
+  }
+  tileBtns.forEach(b => b.addEventListener("click", () => openTile(b === tile ? null : b)));
+  addEventListener("keydown", e => { if (e.key === "Escape" && tile) openTile(null); });
+  narrow.addEventListener("change", placeOut);
 
   // skills → where used
   const used = document.getElementById("used"), chips = document.querySelectorAll(".chip");
