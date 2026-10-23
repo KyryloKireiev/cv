@@ -170,12 +170,17 @@ for (const [code, path] of LOCALES) {
     ok(!(await p.evaluate(() => document.documentElement.scrollWidth > innerWidth)), `${code}: horizontal scroll at 375px with tile text open`);
     await p.keyboard.press("Escape");
     ok(!(await p.isVisible("#exp-out")), `${code}: Esc did not close the tile text on phones`);
-    await p.click("#areas .area-btn >> nth=0"); await p.setViewportSize({ width: 1280, height: 800 });
+    // widen to a short laptop window with the longest text open: back in the side column, and not cut off once pinned
+    await p.click("#areas .area-btn >> nth=0"); await p.setViewportSize({ width: 1024, height: 600 });
     const backInSide = await p.waitForFunction(() => {
       const o = document.getElementById("exp-out");
       return o.nextElementSibling?.id === "exp-live" && o.getBoundingClientRect().height > 0;
     }, null, { timeout: 2000 }).then(() => true, () => false);
     ok(backInSide, `${code}: open tile text did not move back to the side column when the window widened`);
+    await p.waitForFunction((w) => document.querySelector("#exp-out .tx").textContent === w, dict[code]["area.exam.x"], { timeout: 8000 }).catch(() => {});
+    await p.$eval("#showall", (b) => b.scrollIntoView({ block: "center", behavior: "instant" }));
+    const fitsWide = await p.$eval("#exp-out", (o) => o.getBoundingClientRect().bottom <= innerHeight + 1);
+    ok(fitsWide, `${code}: after widening to 1024×600 the pinned tile text is cut off at the bottom`);
     await c.close();
   }
 

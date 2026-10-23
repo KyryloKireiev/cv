@@ -967,6 +967,15 @@ footer a { color: var(--rg-cream); }
     const top = parseFloat(getComputedStyle(expSide).top), over = top + expSide.offsetHeight + 16 - innerHeight;
     if (over > 0) expSide.style.top = (top - over) + "px";
   }
+  // reserve the open text's full height (so typing never moves the page), then fit the pinned column
+  function reserve() {
+    expOut.style.minHeight = "";
+    if (tile) {
+      const tx = expOut.querySelector(".tx"), typed = tx.textContent;
+      tx.textContent = tile.dataset.text; expOut.style.minHeight = expOut.offsetHeight + "px"; tx.textContent = typed;
+    }
+    fitSide();
+  }
   function placeOut() {
     if (narrow.matches && tile) tile.closest(".area").after(expOut);
     else if (expOut.nextElementSibling !== expLive) expLive.before(expOut);
@@ -976,12 +985,9 @@ footer a { color: var(--rg-cream); }
     tileBtns.forEach(x => { x.setAttribute("aria-pressed", String(x === b)); x.closest(".area").classList.toggle("on", x === b); });
     expOut.classList.toggle("open", !!b);
     placeOut();
-    if (!b) { clearInterval(expOut._t); expOut.style.minHeight = ""; expOut.querySelector(".tx").textContent = expHint; expLive.textContent = ""; fitSide(); return; }
+    if (!b) { clearInterval(expOut._t); expOut.querySelector(".tx").textContent = expHint; expLive.textContent = ""; reserve(); return; }
     expOut.querySelector(".rh").textContent = b.closest(".area").querySelector(".yr").textContent + " · " + b.textContent;
-    // reserve the full height first, so the page does not jump while the text types in
-    expOut.style.minHeight = ""; expOut.querySelector(".tx").textContent = b.dataset.text;
-    expOut.style.minHeight = expOut.offsetHeight + "px";
-    fitSide();
+    reserve();
     type(expOut, b.dataset.text, expLive);
     expOut.scrollIntoView({ block: "nearest", behavior: reduce ? "instant" : "smooth" });
   }
@@ -991,10 +997,10 @@ footer a { color: var(--rg-cream); }
     b.closest(".area").addEventListener("click", e => { if (!e.target.closest(".area-btn") && !String(getSelection())) b.click(); });
   });
   addEventListener("keydown", e => { if (e.key === "Escape" && tile) openTile(null); });
-  narrow.addEventListener("change", placeOut);
-  // the reserved height only fits the old width (phones also fire resize when the address bar hides: ignore that)
+  // a new width can cross the phone breakpoint and changes the text's height: move, re-measure, refit.
+  // (phones also fire resize when the address bar hides; then only the column fit can change)
   let expW = innerWidth;
-  addEventListener("resize", () => { if (innerWidth !== expW) { expW = innerWidth; expOut.style.minHeight = ""; } fitSide(); });
+  addEventListener("resize", () => { if (innerWidth !== expW) { expW = innerWidth; placeOut(); reserve(); } else fitSide(); });
 
   // skills → where used
   const used = document.getElementById("used"), chips = document.querySelectorAll(".chip");
