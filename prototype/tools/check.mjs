@@ -118,10 +118,13 @@ for (const [code, path] of LOCALES) {
   ok((await page.getAttribute("html", "class")).includes("paused") && (await page.getAttribute("#pause", "aria-pressed")) === "true", `${code}: pause button did not pause`);
   ok((await page.$eval(".wave .t1", (g) => getComputedStyle(g).animationPlayState)) === "paused", `${code}: waveform still moving when paused`);
   // pause stops ambient motion only: a readout typed because the visitor clicked still types
+  const typesOut = (sel, want) => page.waitForFunction(([s, w]) => document.querySelector(s).textContent === w, [sel, want], { timeout: 8000 }).then(() => true, () => false);
   await page.click("#tab-p1"); await page.click("#p1 [data-id=sso]");
   ok((await page.textContent("#p1 .readout .tx")).length < dict[code]["c1.m.sso.x"].length, `${code}: with the waveform paused, readouts appear at once instead of typing`);
+  ok(await typesOut("#p1 .readout .tx", dict[code]["c1.m.sso.x"]), `${code}: with the waveform paused, a readout never finished typing`);
   await page.click("#areas .area-btn >> nth=0");
   ok((await page.textContent("#exp-out .tx")).length < dict[code]["area.exam.x"].length, `${code}: with the waveform paused, tile text appears at once instead of typing`);
+  ok(await typesOut("#exp-out .tx", dict[code]["area.exam.x"]), `${code}: with the waveform paused, tile text never finished typing`);
 
   ok(errors.length === 0, `${code}: console errors ${JSON.stringify(errors)}`);
   ok(foreign.length === 0, `${code}: third-party requests ${JSON.stringify(foreign)}`);
