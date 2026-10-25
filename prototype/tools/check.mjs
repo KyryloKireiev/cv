@@ -75,9 +75,6 @@ for (const [code, path] of LOCALES) {
   await page.click("#p2 [data-id=m3]");
   ok((await page.textContent("#p2 .live")).includes("36969"), `${code}: rack live region did not get the full text`);
   ok((await page.getAttribute("#p2 [data-id=m3]", "aria-pressed")) === "true", `${code}: module aria-pressed not set`);
-  await page.setViewportSize({ width: 1200, height: 900 }); await page.waitForTimeout(100);
-  ok((await page.$$("#p2 svg.cables path.hot")).length === 2 && (await page.$$("#p2 svg.cables circle.port.hot")).length === 4, `${code}: selected module lost its cable highlight after a resize`);
-  await page.setViewportSize({ width: 1280, height: 900 });
   await page.click("#showall");
   ok((await page.$$eval("#areas .area", (as) => as.filter((a) => a.offsetParent).length)) === 10, `${code}: show-all did not reveal 10 areas`);
 
@@ -164,6 +161,17 @@ for (const [code, path] of LOCALES) {
     ok(clipped === 0, `${code}: ${clipped} header/social element(s) cut off at ${width}px`);
     const names = await p.$$eval("header a, header button", (els) => els.filter((e) => e.offsetParent).map((e) => (e.getAttribute("aria-label") || e.textContent).trim()));
     ok(names.every(Boolean), `${code}: unnamed header control at ${width}px`);
+    await c.close();
+  }
+
+  // ---- a selected module keeps its cable highlight after a resize (own page: resizing the shared desktop
+  //      page left a stray smooth scroll behind that broke later steps) ----
+  {
+    const c = await browser.newContext({ viewport: { width: 1280, height: 900 } }); const p = await c.newPage();
+    await p.goto(origin + path, { waitUntil: "networkidle" });
+    await p.click("#tab-p2"); await p.click("#p2 [data-id=m3]");
+    await p.setViewportSize({ width: 1200, height: 900 }); await p.waitForFunction(() => innerWidth === 1200); await p.waitForTimeout(100);
+    ok((await p.$$("#p2 svg.cables path.hot")).length === 2 && (await p.$$("#p2 svg.cables circle.port.hot")).length === 4, `${code}: selected module lost its cable highlight after a resize`);
     await c.close();
   }
 

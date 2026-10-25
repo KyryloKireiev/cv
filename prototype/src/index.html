@@ -1062,7 +1062,9 @@ footer a { color: var(--rg-cream); }
     expOut.querySelector(".rh").textContent = b.closest(".area").querySelector(".yr").textContent + " · " + b.textContent;
     reserve();
     type(expOut, b.dataset.text, expLive);
-    expOut.scrollIntoView({ block: "nearest", behavior: reduce ? "instant" : "smooth" });
+    // bring the whole text on screen; measured by hand because scrollIntoView is unreliable inside the sticky column
+    const o = expOut.getBoundingClientRect(), below = o.bottom - (innerHeight - 16), above = 80 - o.top; // 80: under the 64px header
+    if (below > 0 || above > 0) scrollBy({ top: below > 0 ? below : -above, behavior: reduce ? "instant" : "smooth" });
   }
   tileBtns.forEach(b => {
     b.addEventListener("click", () => openTile(b === tile ? null : b));
