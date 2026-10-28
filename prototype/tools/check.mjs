@@ -77,6 +77,39 @@ for (const [code, path] of LOCALES) {
   ok((await page.getAttribute("#p2 [data-id=m3]", "aria-pressed")) === "true", `${code}: module aria-pressed not set`);
   await page.click("#showall");
   ok((await page.$$eval("#areas .area", (as) => as.filter((a) => a.offsetParent).length)) === 10, `${code}: show-all did not reveal 10 areas`);
+
+  // ---- experience tiles: click → text typed beside the tiles; again, Esc or "show fewer" → closed ----
+  const btns = "#areas .area-btn", pick = dict[code]["exp.pick"], exam = dict[code]["area.exam.x"];
+  const nonePressed = () => page.$$eval(btns, (bs) => bs.every((b) => b.getAttribute("aria-pressed") === "false"));
+  ok((await page.$$(btns)).length === 10 && (await nonePressed()), `${code}: expected 10 tile buttons, none pressed`);
+  ok((await page.textContent("#exp-out .tx")).trim() === pick, `${code}: tile readout should start with the hint "${pick}"`);
+  const selectable = await page.$eval("#areas .area p", (el) => { const r = el.getBoundingClientRect(); return document.elementFromPoint(r.left + 4, r.top + r.height / 2) === el; });
+  ok(selectable, `${code}: a tile's description is covered by its button, so its text cannot be selected`);
+  const tile0 = await page.locator("#areas .area").first().boundingBox();
+  await page.click("#areas .area >> nth=0", { position: { x: 16, y: tile0.height - 10 } }); // the whole tile is clickable, not only its title
+  ok((await page.getAttribute(`${btns} >> nth=0`, "aria-pressed")) === "true" && (await page.textContent("#exp-live")) === exam, `${code}: clicking a tile did not select it or announce its text`);
+  const typingH = await page.$eval("#exp-out", (o) => o.getBoundingClientRect().height);
+  await page.waitForFunction((w) => document.querySelector("#exp-out .tx").textContent === w, exam, { timeout: 8000 }).catch(() => {});
+  ok((await page.textContent("#exp-out .tx")) === exam, `${code}: tile text was not typed out in full`);
+  const typedH = await page.$eval("#exp-out", (o) => o.getBoundingClientRect().height);
+  ok(Math.abs(typedH - typingH) < 1, `${code}: tile text box grows while typing (${typingH}px → ${typedH}px), so the page jumps`);
+  const beside = await page.evaluate(() => {
+    const o = document.getElementById("exp-out").getBoundingClientRect(), a = document.querySelector("#areas .area").getBoundingClientRect();
+    return o.width > 0 && o.right <= a.left && o.top >= 0 && o.bottom <= innerHeight;
+  });
+  ok(beside, `${code}: tile text is not visible to the left of the tiles at 1280px`);
+  await page.$eval("#areas .area:last-child", (a) => a.scrollIntoView({ block: "center", behavior: "instant" }));
+  const titleTop = await page.$eval("#experience h2", (h) => h.getBoundingClientRect().top);
+  ok(titleTop >= 64 && titleTop < 200, `${code}: section title is not pinned beside the last tile (top ${Math.round(titleTop)}px)`);
+  await page.click(`${btns} >> nth=0`);
+  ok((await nonePressed()) && (await page.textContent("#exp-out .tx")).trim() === pick, `${code}: clicking the open tile again did not close it`);
+  await page.focus(`${btns} >> nth=1`); await page.keyboard.press("Enter");
+  ok((await page.getAttribute(`${btns} >> nth=1`, "aria-pressed")) === "true", `${code}: Enter on a tile did not open it`);
+  await page.keyboard.press("Escape");
+  ok(await nonePressed(), `${code}: Esc did not close the tile text`);
+  await page.click(`${btns} >> nth=9`); await page.click("#showall");
+  ok(!(await page.$("#areas .area.on")) && (await nonePressed()), `${code}: hiding the open tile with "show fewer" left it open`);
+
   const hint = await page.textContent("#used");
   await page.click(".chip >> nth=8");
   ok((await page.textContent("#used")) !== hint, `${code}: skill chip did not update panel`);
@@ -84,6 +117,14 @@ for (const [code, path] of LOCALES) {
   await page.click("#pause");
   ok((await page.getAttribute("html", "class")).includes("paused") && (await page.getAttribute("#pause", "aria-pressed")) === "true", `${code}: pause button did not pause`);
   ok((await page.$eval(".wave .t1", (g) => getComputedStyle(g).animationPlayState)) === "paused", `${code}: waveform still moving when paused`);
+  // pause stops ambient motion only: a readout typed because the visitor clicked still types
+  const typesOut = (sel, want) => page.waitForFunction(([s, w]) => document.querySelector(s).textContent === w, [sel, want], { timeout: 8000 }).then(() => true, () => false);
+  await page.click("#tab-p1"); await page.click("#p1 [data-id=sso]");
+  ok((await page.textContent("#p1 .readout .tx")).length < dict[code]["c1.m.sso.x"].length, `${code}: with the waveform paused, readouts appear at once instead of typing`);
+  ok(await typesOut("#p1 .readout .tx", dict[code]["c1.m.sso.x"]), `${code}: with the waveform paused, a readout never finished typing`);
+  await page.click("#areas .area-btn >> nth=0");
+  ok((await page.textContent("#exp-out .tx")).length < dict[code]["area.exam.x"].length, `${code}: with the waveform paused, tile text appears at once instead of typing`);
+  ok(await typesOut("#exp-out .tx", dict[code]["area.exam.x"]), `${code}: with the waveform paused, tile text never finished typing`);
 
   ok(errors.length === 0, `${code}: console errors ${JSON.stringify(errors)}`);
   ok(foreign.length === 0, `${code}: third-party requests ${JSON.stringify(foreign)}`);
@@ -106,7 +147,7 @@ for (const [code, path] of LOCALES) {
       const p = await c.newPage();
       await p.goto(origin + path, { waitUntil: "networkidle" });
       ok((await p.getAttribute("html", "data-theme")) === theme, `${code} ${width} ${theme}: OS theme not followed`);
-      await p.click("#showall");
+      await p.click("#showall"); await p.click("#areas .area-btn >> nth=0");
       const axe = await new AxeBuilder({ page: p }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
       for (const v of axe.violations) ok(false, `${code} ${width}px ${theme}: axe ${v.id} (${v.impact}) × ${v.nodes.length}: ${v.nodes[0].target.join(" ")}`);
       await c.close();
@@ -120,6 +161,131 @@ for (const [code, path] of LOCALES) {
     ok(clipped === 0, `${code}: ${clipped} header/social element(s) cut off at ${width}px`);
     const names = await p.$$eval("header a, header button", (els) => els.filter((e) => e.offsetParent).map((e) => (e.getAttribute("aria-label") || e.textContent).trim()));
     ok(names.every(Boolean), `${code}: unnamed header control at ${width}px`);
+    await c.close();
+  }
+
+  // ---- a selected module keeps its cable highlight after a resize (own page: resizing the shared desktop
+  //      page left a stray smooth scroll behind that broke later steps) ----
+  {
+    const c = await browser.newContext({ viewport: { width: 1280, height: 900 } }); const p = await c.newPage();
+    await p.goto(origin + path, { waitUntil: "networkidle" });
+    await p.click("#tab-p2"); await p.click("#p2 [data-id=m3]");
+    await p.setViewportSize({ width: 1200, height: 900 }); await p.waitForFunction(() => innerWidth === 1200); await p.waitForTimeout(100);
+    ok((await p.$$("#p2 svg.cables path.hot")).length === 2 && (await p.$$("#p2 svg.cables circle.port.hot")).length === 4, `${code}: selected module lost its cable highlight after a resize`);
+    await c.close();
+  }
+
+  // ---- rack cables: from each module's top edge, only through the gaps, right angles only, every cable in
+  //      its own lane, and clear of other cables' ports ----
+  for (const width of [1280, 375, 320]) {
+    const c = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" }); const p = await c.newPage();
+    await p.goto(origin + path, { waitUntil: "networkidle" });
+    for (let t = 1; t <= 5; t++) {
+      await p.click(`#tab-p${t}`); await p.waitForTimeout(100);
+      const bad = await p.$eval(`#p${t} .bay`, (bay) => {
+        const rects = [...bay.querySelectorAll(".mod")].map((m) => m.getBoundingClientRect()), svgR = bay.querySelector("svg.cables").getBoundingClientRect();
+        const paths = [...bay.querySelectorAll("svg.cables path")], out = [];
+        if (paths.length !== bay.dataset.links.split(",").length) out.push(`expected ${bay.dataset.links.split(",").length} cables, found ${paths.length}`);
+        for (const pth of paths) {
+          const L = pth.getTotalLength(), start = pth.getPointAtLength(0), end = pth.getPointAtLength(L);
+          // both ends sit on the top edge of a module
+          for (const [pt, id] of [[start, pth.dataset.a], [end, pth.dataset.b]]) {
+            const r = bay.querySelector(`[data-id="${id}"]`).getBoundingClientRect(), x = svgR.left + pt.x, y = svgR.top + pt.y;
+            if (Math.abs(y - r.top) > 1 || x < r.left || x > r.right) out.push(`${pth.dataset.a}-${pth.dataset.b}: end not on the top edge of ${id}`);
+          }
+          for (let s = 0; s <= L; s += 3) {
+            const pt = pth.getPointAtLength(s), x = svgR.left + pt.x, y = svgR.top + pt.y;
+            const hit = rects.find((r) => x > r.left + 2 && x < r.right - 2 && y > r.top + 2 && y < r.bottom - 2);
+            if (hit) { out.push(`${pth.dataset.a}-${pth.dataset.b} crosses a module`); break; }
+          }
+          // right angles only: straight runs are horizontal or vertical, every corner is a quarter turn
+          const d = pth.getAttribute("d"), name = `${pth.dataset.a}-${pth.dataset.b}`;
+          if (/[^MLQ\d.\s,-]/.test(d)) out.push(`${name}: uses curve commands other than corners`);
+          let cur = null;
+          for (const seg of d.match(/[MLQ][^MLQ]*/g)) {
+            const n = seg.slice(1).trim().split(/[\s,]+/).map(Number), near = (u, v) => Math.abs(u - v) < .5;
+            if (seg[0] === "L" && !near(n[0], cur[0]) && !near(n[1], cur[1])) { out.push(`${name}: diagonal run`); break; }
+            if (seg[0] === "Q" && !((near(n[0], cur[0]) && near(n[1], n[3])) || (near(n[1], cur[1]) && near(n[0], n[2])))) { out.push(`${name}: corner is not a right angle`); break; }
+            cur = seg[0] === "Q" ? [n[2], n[3]] : [n[0], n[1]];
+          }
+        }
+        // sample every cable at 1px for the two tests below
+        const samples = paths.map((pth) => { const L = pth.getTotalLength(), pts = []; for (let s = 0; s <= L; s += 1) { const q = pth.getPointAtLength(s); pts.push([q.x, q.y]); } return pts; });
+        const dist = (p, pts) => Math.min(...pts.map((q) => Math.hypot(p[0] - q[0], p[1] - q[1])));
+        // own lane: no two cables run within 2px of each other for 8px or more (a right-angle crossing is ~4px)
+        for (let i = 0; i < paths.length; i++) for (let j = i + 1; j < paths.length; j++) {
+          let run = 0, worst = 0;
+          for (const p of samples[i]) { run = dist(p, samples[j]) < 2 ? run + 1 : 0; worst = Math.max(worst, run); }
+          if (worst >= 8) out.push(`${paths[i].dataset.a}-${paths[i].dataset.b} and ${paths[j].dataset.a}-${paths[j].dataset.b} share a line for ${worst}px`);
+        }
+        // clear of ports: a cable never passes within 7.5px of a port that is not one of its own two ends
+        const ports = [...bay.querySelectorAll("svg.cables circle.port")].map((c) => ({ l: c.dataset.l, p: [+c.getAttribute("cx"), +c.getAttribute("cy")] }));
+        if (ports.length !== 2 * paths.length || [...ports.map((p) => p.l), ...paths.map((p) => p.dataset.l)].some((l) => l === undefined))
+          out.push(`expected 2 ports per cable, each cable and port tagged with its link (data-l)`);
+        paths.forEach((pth, i) => {
+          const close = ports.find((pt) => pt.l !== pth.dataset.l && dist(pt.p, samples[i]) < 7.5);
+          if (close) out.push(`${pth.dataset.a}-${pth.dataset.b} runs through another cable's port`);
+        });
+        return out;
+      });
+      for (const b of bad) ok(false, `${code} ${width}px rack ${t}: ${b}`);
+    }
+    await c.close();
+  }
+
+  // ---- phones: no tile hint until a tap, then the text opens right under the tapped tile ----
+  {
+    const c = await browser.newContext({ viewport: { width: 375, height: 800 } }); const p = await c.newPage();
+    await p.goto(origin + path, { waitUntil: "networkidle" });
+    ok(!(await p.isVisible("#exp-out")), `${code}: tile hint shown on phones before any tap`);
+    await p.click("#areas .area-btn >> nth=1");
+    const under = await p.evaluate(() => {
+      const o = document.getElementById("exp-out");
+      return o.previousElementSibling === document.querySelectorAll("#areas .area")[1] && o.getBoundingClientRect().height > 0;
+    });
+    ok(under, `${code}: on phones the tile text should open under the tapped tile`);
+    ok(!(await p.evaluate(() => document.documentElement.scrollWidth > innerWidth)), `${code}: horizontal scroll at 375px with tile text open`);
+    await p.keyboard.press("Escape");
+    ok(!(await p.isVisible("#exp-out")), `${code}: Esc did not close the tile text on phones`);
+    // widen to a short laptop window with the longest text open: back in the side column, and not cut off once pinned
+    await p.click("#areas .area-btn >> nth=0"); await p.setViewportSize({ width: 1024, height: 600 });
+    const backInSide = await p.waitForFunction(() => {
+      const o = document.getElementById("exp-out");
+      return o.nextElementSibling?.id === "exp-live" && o.getBoundingClientRect().height > 0;
+    }, null, { timeout: 2000 }).then(() => true, () => false);
+    ok(backInSide, `${code}: open tile text did not move back to the side column when the window widened`);
+    const typedWide = await p.waitForFunction((w) => document.querySelector("#exp-out .tx").textContent === w, dict[code]["area.exam.x"], { timeout: 8000 }).then(() => true, () => false);
+    ok(typedWide, `${code}: after widening, the tile text never finished typing`);
+    await p.$eval("#showall", (b) => b.scrollIntoView({ block: "center", behavior: "instant" }));
+    const fitsWide = await p.$eval("#exp-out", (o) => o.getBoundingClientRect().bottom <= innerHeight + 1);
+    ok(fitsWide, `${code}: after widening to 1024×600 the pinned tile text is cut off at the bottom`);
+    await c.close();
+  }
+
+  // ---- a tile opened at the very bottom of the screen: its text scrolls into view ----
+  // fresh page with reduced motion, so no smooth scroll from earlier steps moves the start position
+  for (const [width, height] of [[375, 800], [1024, 640]]) {
+    const c = await browser.newContext({ viewport: { width, height }, reducedMotion: "reduce" }); const p = await c.newPage();
+    await p.goto(origin + path, { waitUntil: "networkidle" });
+    await p.$eval("#areas .area:nth-child(3)", (a) => a.scrollIntoView({ block: "end", behavior: "instant" }));
+    const start = await p.$eval("#areas .area:nth-child(3)", (a) => a.getBoundingClientRect().bottom - innerHeight);
+    ok(Math.abs(start) < 2, `${code}: test setup at ${width}×${height}: tile not at the bottom of the screen (off by ${start}px)`);
+    await p.focus("#areas .area-btn >> nth=2"); await p.keyboard.press("Enter");
+    const fits = await p.$eval("#exp-out", (o) => { const r = o.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight + 1; });
+    ok(fits, `${code}: text of a tile at the bottom of the screen opens off-screen at ${width}×${height}`);
+    await c.close();
+  }
+
+  // ---- short laptop window: the pinned column shifts up so the open text is never cut off ----
+  for (const [width, height] of [[1024, 640], [920, 700]]) {
+    const c = await browser.newContext({ viewport: { width, height }, reducedMotion: "reduce" }); const p = await c.newPage();
+    await p.goto(origin + path, { waitUntil: "networkidle" });
+    // the exam text is the longest; open it, then scroll on so the column is pinned
+    await p.click("#showall"); await p.click("#areas .area-btn >> nth=0");
+    await p.$eval("#areas .area:nth-child(7)", (a) => a.scrollIntoView({ block: "center", behavior: "instant" }));
+    const fits = await p.$eval("#exp-out", (o) => { const r = o.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight + 1; });
+    ok(fits, `${code}: pinned tile text is cut off at the bottom at ${width}×${height}`);
+    ok(!(await p.evaluate(() => document.documentElement.scrollWidth > innerWidth)), `${code}: horizontal scroll at ${width}px with tile text open`);
     await c.close();
   }
 
@@ -160,10 +326,13 @@ for (const [code, path] of LOCALES) {
   await rp.goto(origin + path, { waitUntil: "networkidle" });
   const hidden = await rp.$$eval(".reveal", (els) => els.filter((e) => getComputedStyle(e).opacity !== "1").length);
   ok(hidden === 0, `${code}: reduced motion leaves ${hidden} sections hidden`);
+  await rp.click("#areas .area-btn >> nth=0");
+  ok((await rp.textContent("#exp-out .tx")) === dict[code]["area.exam.x"], `${code}: with reduced motion the tile text should appear at once`);
   await rm.close();
   const nj = await browser.newContext({ javaScriptEnabled: false }); const np = await nj.newPage();
   await np.goto(origin + path);
   ok((await np.textContent("h2")).trim().length > 3 && (await np.textContent("#prod")).trim().length > 0, `${code}: content missing with JS off`);
+  ok(!(await np.isVisible("#exp-out")), `${code}: tile hint shown with JS off, where tiles cannot open`);
   await nj.close();
 
   console.log(`${code}: checked`);

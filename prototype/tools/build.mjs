@@ -12,7 +12,7 @@ import { fileURLToPath } from "node:url";
 import { yearsInProduction } from "./years.mjs";
 
 // Public address: used for canonical and hreflang links. Change here if the domain changes.
-const SITE = "https://kyrylo-kireiev.pages.dev";
+const SITE = "https://kyrylo-kireiev.dev";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SRC = resolve(HERE, "../src");
@@ -121,7 +121,7 @@ for (const loc of LOCALES) {
   console.log(`✓ page: ${loc.path}`);
 }
 
-// 404: both languages on one small page (Cloudflare Pages serves 404.html for unknown paths)
+// 404: both languages on one small page (Cloudflare serves 404.html for unknown paths, see wrangler.jsonc)
 const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 await writeFile(join(DIST, "404.html"), `<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
