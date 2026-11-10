@@ -3,8 +3,11 @@
 import { chromium } from "playwright";
 import { AxeBuilder } from "@axe-core/playwright";
 import { readFile } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
 
 const dict = JSON.parse(await readFile(new URL("../src/i18n.json", import.meta.url), "utf8"));
+// committer date of the last commit touching prototype/src, as "YYYY-MM" in the committer's own time zone
+const lastSiteChange = execFileSync("git", ["log", "-1", "--format=%cI", "--", "prototype/src"], { cwd: new URL("../..", import.meta.url), encoding: "utf8" }).slice(0, 7);
 
 const origin = process.argv[2] || "http://127.0.0.1:8080";
 const LOCALES = [["en", "/"], ["uk", "/uk/"]];
@@ -26,6 +29,34 @@ for (const [code, path] of LOCALES) {
   ok((await page.getAttribute("html", "lang")) === code, `${code}: <html lang> is not ${code}`);
   ok((await page.title()).includes("Kyrylo Kireiev"), `${code}: bad title`);
   ok((await page.$$("link[rel=alternate][hreflang]")).length === 3 && (await page.$("link[rel=canonical]")), `${code}: hreflang/canonical missing`);
+
+  // link preview card: absolute og:image on the public domain, one 1200×630 PNG per locale, described for screen readers
+  const meta = (sel) => page.evaluate((s) => document.querySelector(s)?.getAttribute("content") ?? null, sel);
+  const site = new URL(await page.getAttribute("link[rel=canonical]", "href")).origin;
+  ok((await meta('meta[property="og:image"]')) === `${site}/og-${code}.png`, `${code}: og:image is ${await meta('meta[property="og:image"]')}`);
+  ok((await meta('meta[property="og:image:width"]')) === "1200" && (await meta('meta[property="og:image:height"]')) === "630", `${code}: og:image size tags missing`);
+  ok((await meta('meta[property="og:image:alt"]')) === dict[code]["og.alt"], `${code}: og:image:alt missing or not from i18n`);
+  ok((await meta('meta[name="twitter:card"]')) === "summary_large_image", `${code}: twitter:card is not summary_large_image`);
+  // profile data for search engines (schema.org Person, JSON-LD): matches what the page shows; GitHub and LinkedIn only
+  const ld = await page.evaluate(() => { try { return JSON.parse(document.querySelector('script[type="application/ld+json"]')?.textContent); } catch { return null; } });
+  const shown = await page.evaluate(() => ({
+    name: document.querySelector(".brand").textContent.trim(), desc: document.querySelector('meta[name="description"]').content,
+    profiles: [...document.querySelectorAll(".socials a")].map((a) => a.href).filter((h) => /github\.com|linkedin\.com/.test(h)),
+  }));
+  ok(ld?.["@context"] === "https://schema.org" && ld?.["@type"] === "Person", `${code}: no schema.org Person data`);
+  ok(ld?.name === shown.name && ld?.jobTitle === dict[code]["ld.jobTitle"] && ld?.description === shown.desc,
+    `${code}: Person name/jobTitle/description differ from the page: ${JSON.stringify(ld && [ld.name, ld.jobTitle])}`);
+  ok(ld?.url === `${site}${path}` && ld?.homeLocation?.name === dict[code]["meta.locationValue"], `${code}: Person url or location wrong`);
+  ok(shown.profiles.length === 2 && JSON.stringify(ld?.sameAs) === JSON.stringify(shown.profiles), `${code}: Person profiles are not exactly the page's GitHub and LinkedIn links: ${JSON.stringify(ld?.sameAs)}`);
+
+  // "Updated": month of the last commit that changed the site itself (prototype/src), month names from i18n
+  const [uy, um] = lastSiteChange.split("-").map(Number);
+  const updated = await page.evaluate(() => document.getElementById("updated")?.textContent ?? null);
+  ok(updated === `${(dict[code]["meta.months"] || [])[um - 1]} ${uy}`, `${code}: "Updated" shows ${JSON.stringify(updated)}, not the last site change (${lastSiteChange})`);
+
+  const card = await page.request.get(`${origin}/og-${code}.png`), cardBuf = card.ok() ? await card.body() : Buffer.alloc(0);
+  ok(cardBuf.length > 24 && cardBuf.toString("latin1", 1, 4) === "PNG" && cardBuf.readUInt32BE(16) === 1200 && cardBuf.readUInt32BE(20) === 630,
+    `${code}: /og-${code}.png is not a 1200×630 PNG`);
 
   for (const sel of ['link[rel=icon][type="image/svg+xml"]', 'link[rel=icon][type="image/png"]', "link[rel=apple-touch-icon]", "a.btn-pdf"]) {
     const href = await page.getAttribute(sel, "href");
@@ -74,6 +105,22 @@ for (const [code, path] of LOCALES) {
   ok((await page.isVisible("#p2")) && (await page.getAttribute("#tab-p2", "aria-selected")) === "true", `${code}: arrow key did not switch tab`);
   await page.click("#p2 [data-id=m3]");
   ok((await page.textContent("#p2 .live")).includes("36969"), `${code}: rack live region did not get the full text`);
+
+  // six case studies, the last one about how this site is built; every rack says "NN / total"
+  const tabCount = await page.$$eval("[role=tab]", (ts) => ts.length);
+  ok(tabCount === 6, `${code}: expected 6 work tabs, found ${tabCount}`);
+  await page.click("#tab-p1"); await page.keyboard.press("End");
+  ok((await page.isVisible("#p6")) && (await page.getAttribute("#tab-p6", "aria-selected")) === "true", `${code}: End did not select the last tab (06)`);
+  for (let t = 1; t <= tabCount; t++) {
+    const head = (await page.textContent(`#p${t} .rhead span`)) || "";
+    ok(head.startsWith(`0${t} / 0${tabCount} `), `${code}: rack ${t} header "${head}" does not read 0${t} / 0${tabCount}`);
+  }
+  // every module of the new rack fills the readout with its own text
+  for (const id of await page.$$eval("#p6 .mod", (ms) => ms.map((m) => m.dataset.id))) {
+    await page.click(`#p6 [data-id=${id}]`);
+    const live = await page.textContent("#p6 .live"), want = dict[code][`c6.m.${id}.x`];
+    ok(!!want && live === want, `${code}: module ${id} on rack 6 did not put its text in the readout`);
+  }
   ok((await page.getAttribute("#p2 [data-id=m3]", "aria-pressed")) === "true", `${code}: module aria-pressed not set`);
   await page.click("#showall");
   ok((await page.$$eval("#areas .area", (as) => as.filter((a) => a.offsetParent).length)) === 10, `${code}: show-all did not reveal 10 areas`);
@@ -85,8 +132,12 @@ for (const [code, path] of LOCALES) {
   ok((await page.textContent("#exp-out .tx")).trim() === pick, `${code}: tile readout should start with the hint "${pick}"`);
   const selectable = await page.$eval("#areas .area p", (el) => { const r = el.getBoundingClientRect(); return document.elementFromPoint(r.left + 4, r.top + r.height / 2) === el; });
   ok(selectable, `${code}: a tile's description is covered by its button, so its text cannot be selected`);
+  // Bring the tile on screen instantly, then click with the raw mouse. The page scrolls smoothly (CSS), and
+  // page.click() sometimes runs its own pre-click scroll, which then animates: the page measured the readout
+  // mid-animation and the check failed about 2 runs in 3, depending on where the page happened to be.
+  await page.$eval("#areas .area", (a) => a.scrollIntoView({ block: "center", behavior: "instant" }));
   const tile0 = await page.locator("#areas .area").first().boundingBox();
-  await page.click("#areas .area >> nth=0", { position: { x: 16, y: tile0.height - 10 } }); // the whole tile is clickable, not only its title
+  await page.mouse.click(tile0.x + 16, tile0.y + tile0.height - 10); // the whole tile is clickable, not only its title
   ok((await page.getAttribute(`${btns} >> nth=0`, "aria-pressed")) === "true" && (await page.textContent("#exp-live")) === exam, `${code}: clicking a tile did not select it or announce its text`);
   const typingH = await page.$eval("#exp-out", (o) => o.getBoundingClientRect().height);
   await page.waitForFunction((w) => document.querySelector("#exp-out .tx").textContent === w, exam, { timeout: 8000 }).catch(() => {});
@@ -95,9 +146,9 @@ for (const [code, path] of LOCALES) {
   ok(Math.abs(typedH - typingH) < 1, `${code}: tile text box grows while typing (${typingH}px → ${typedH}px), so the page jumps`);
   const beside = await page.evaluate(() => {
     const o = document.getElementById("exp-out").getBoundingClientRect(), a = document.querySelector("#areas .area").getBoundingClientRect();
-    return o.width > 0 && o.right <= a.left && o.top >= 0 && o.bottom <= innerHeight;
+    return { ok: o.width > 0 && o.right <= a.left && o.top >= 0 && o.bottom <= innerHeight, at: `text ${Math.round(o.top)}–${Math.round(o.bottom)}px of ${innerHeight}, right ${Math.round(o.right)} vs tiles ${Math.round(a.left)}, scrollY ${Math.round(scrollY)}` };
   });
-  ok(beside, `${code}: tile text is not visible to the left of the tiles at 1280px`);
+  ok(beside.ok, `${code}: tile text is not visible to the left of the tiles at 1280px (${beside.at})`);
   await page.$eval("#areas .area:last-child", (a) => a.scrollIntoView({ block: "center", behavior: "instant" }));
   const titleTop = await page.$eval("#experience h2", (h) => h.getBoundingClientRect().top);
   ok(titleTop >= 64 && titleTop < 200, `${code}: section title is not pinned beside the last tile (top ${Math.round(titleTop)}px)`);
@@ -114,17 +165,23 @@ for (const [code, path] of LOCALES) {
   await page.click(".chip >> nth=8");
   ok((await page.textContent("#used")) !== hint, `${code}: skill chip did not update panel`);
 
-  await page.click("#pause");
-  ok((await page.getAttribute("html", "class")).includes("paused") && (await page.getAttribute("#pause", "aria-pressed")) === "true", `${code}: pause button did not pause`);
-  ok((await page.$eval(".wave .t1", (g) => getComputedStyle(g).animationPlayState)) === "paused", `${code}: waveform still moving when paused`);
-  // pause stops ambient motion only: a readout typed because the visitor clicked still types
+  ok(!(await page.$(".wave-row, .wave, #pause, .pause-row")), `${code}: a removed feature (waveform, pause button) is back on the page`);
+  // no pause control, so no CSS animation may loop forever (WCAG 2.2.2: blinking/moving stops within 5 s).
+  // The hero rotor is a deliberate exception: JS-driven, Kyrylo's choice, still off under reduced motion.
+  const endless = await page.evaluate(() => document.getAnimations().filter((a) => a.effect.getTiming().iterations === Infinity).map((a) => a.animationName || a.id));
+  ok(endless.length === 0, `${code}: animations that never stop: ${JSON.stringify(endless)}`);
+  ok(await page.$eval(".brand .sq", (s) => s.getAnimations().every((a) => a.effect.getComputedTiming().endTime <= 5000)), `${code}: logo square pulses for more than 5 s`);
+  // readouts type word by word and finish; the cursor then blinks again (restarted), for under 5 s
   const typesOut = (sel, want) => page.waitForFunction(([s, w]) => document.querySelector(s).textContent === w, [sel, want], { timeout: 8000 }).then(() => true, () => false);
+  const curFresh = (sel) => page.$eval(sel, (c) => { const a = c.getAnimations()[0]; return !!a && a.currentTime < 2000 && a.effect.getComputedTiming().endTime <= 5000; });
   await page.click("#tab-p1"); await page.click("#p1 [data-id=sso]");
-  ok((await page.textContent("#p1 .readout .tx")).length < dict[code]["c1.m.sso.x"].length, `${code}: with the waveform paused, readouts appear at once instead of typing`);
-  ok(await typesOut("#p1 .readout .tx", dict[code]["c1.m.sso.x"]), `${code}: with the waveform paused, a readout never finished typing`);
+  ok((await page.textContent("#p1 .readout .tx")).length < dict[code]["c1.m.sso.x"].length, `${code}: readouts appear at once instead of typing`);
+  ok(await typesOut("#p1 .readout .tx", dict[code]["c1.m.sso.x"]), `${code}: a readout never finished typing`);
+  ok(await curFresh("#p1 .readout .cur"), `${code}: readout cursor does not blink (briefly) after typing`);
   await page.click("#areas .area-btn >> nth=0");
-  ok((await page.textContent("#exp-out .tx")).length < dict[code]["area.exam.x"].length, `${code}: with the waveform paused, tile text appears at once instead of typing`);
-  ok(await typesOut("#exp-out .tx", dict[code]["area.exam.x"]), `${code}: with the waveform paused, tile text never finished typing`);
+  ok((await page.textContent("#exp-out .tx")).length < dict[code]["area.exam.x"].length, `${code}: tile text appears at once instead of typing`);
+  ok(await typesOut("#exp-out .tx", dict[code]["area.exam.x"]), `${code}: tile text never finished typing`);
+  ok(await curFresh("#exp-out .cur"), `${code}: tile text cursor does not blink (briefly) after typing`);
 
   ok(errors.length === 0, `${code}: console errors ${JSON.stringify(errors)}`);
   ok(foreign.length === 0, `${code}: third-party requests ${JSON.stringify(foreign)}`);
@@ -175,12 +232,22 @@ for (const [code, path] of LOCALES) {
     await c.close();
   }
 
+  // ---- PDF / print: the "this site" case study stays on the web; the work case studies stay in ----
+  {
+    const c = await browser.newContext(); const p = await c.newPage();
+    await p.emulateMedia({ media: "print" }); await p.goto(origin + path, { waitUntil: "networkidle" });
+    ok(await p.$eval("#p6", (el) => getComputedStyle(el).display === "none").catch(() => false), `${code}: the "this site" case study is in the PDF`);
+    ok(await p.$eval("#p5", (el) => getComputedStyle(el).display !== "none"), `${code}: work case studies missing from print`);
+    await c.close();
+  }
+
   // ---- rack cables: from each module's top edge, only through the gaps, right angles only, every cable in
   //      its own lane, and clear of other cables' ports ----
   for (const width of [1280, 375, 320]) {
     const c = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" }); const p = await c.newPage();
     await p.goto(origin + path, { waitUntil: "networkidle" });
-    for (let t = 1; t <= 5; t++) {
+    const nTabs = await p.$$eval("[role=tab]", (ts) => ts.length);
+    for (let t = 1; t <= nTabs; t++) {
       await p.click(`#tab-p${t}`); await p.waitForTimeout(100);
       const bad = await p.$eval(`#p${t} .bay`, (bay) => {
         const rects = [...bay.querySelectorAll(".mod")].map((m) => m.getBoundingClientRect()), svgR = bay.querySelector("svg.cables").getBoundingClientRect();

@@ -16,13 +16,17 @@ Ukrainian side by side. The build refuses to run if a key is missing in either l
 cd prototype/tools
 npm install && npx playwright install chromium   # once: build tools and the browser they drive
 npm test                                         # unit tests
-npm run build                                    # → prototype/dist: /, /uk/, 404, favicons, PDFs
+npm run build                                    # → prototype/dist: /, /uk/, 404, favicons, PDFs, link preview cards
 python3 -m http.server 8080 --bind 127.0.0.1 -d ../dist   # serve dist/ (another terminal)
 npm run check                                    # browser + axe checks against the served dist/
 ```
 
 Stop the server with `Ctrl+C`. There is no live reload: after editing, run `npm run build`
 again and refresh the browser.
+
+The hero's "Updated" month is not typed by hand: the build takes it from the last commit that
+changed `prototype/src`, using the month names in `i18n.json` (`meta.months`). So the build needs
+the full git history; it stops with a clear message in a shallow clone.
 
 **Deploying:** live at [kyrylo-kireiev.dev](https://kyrylo-kireiev.dev). `dist/` is build
 output and is not committed. [GitHub Actions](.github/workflows/deploy.yml) runs the tests,
@@ -53,7 +57,7 @@ The setup lives in [`.claude/`](.claude) and [`CLAUDE.md`](CLAUDE.md):
 | `qa-tester` agent | Checks the built site in a real browser: every language, mobile/desktop, light/dark, keyboard |
 | `content-researcher` agent | Gathers sourced facts for the CV; never invents numbers |
 | `cv-content` skill | How to edit CV text and add a language |
-| `verify-before-commit` hook | Blocks a commit while the checks fail |
+| `verify-before-commit` hook | Blocks a commit while the checks fail. Inactive for v0: it only runs once the Astro build adds a root `package.json`; until then the CI checks are the gate |
 
 ## Editing the CV
 
