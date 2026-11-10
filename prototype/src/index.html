@@ -33,7 +33,7 @@
   --hairline-dark: rgba(249, 243, 237, .16);
 
   --bg: var(--rg-cream); --surface: var(--rg-white); --fg: var(--rg-graphite); --muted: var(--rg-muted-on-light);
-  --line: var(--rg-cream-200); --accent-lg: var(--rg-green); --accent: var(--rg-green-700); --wave-3: var(--rg-green-700);
+  --line: var(--rg-cream-200); --accent-lg: var(--rg-green); --accent: var(--rg-green-700);
   --card-edge: none;
   --focus: var(--rg-graphite);
 
@@ -48,7 +48,7 @@
 :root:lang(uk) { --font-web: "Roboto Condensed", "Arial Narrow", sans-serif; --font-button: "Roboto Condensed", Arial, sans-serif; }
 :root[data-theme="dark"] {
   --bg: var(--rg-graphite); --surface: var(--rg-graphite-800); --fg: var(--rg-cream); --muted: var(--rg-muted-on-dark);
-  --line: var(--hairline-dark); --accent-lg: var(--rg-peach); --accent: var(--rg-peach); --wave-3: var(--rg-muted-on-dark);
+  --line: var(--hairline-dark); --accent-lg: var(--rg-peach); --accent: var(--rg-peach);
   --card-edge: inset 0 0 0 1px var(--hairline-dark);
   --focus: var(--rg-peach);
   color-scheme: dark;
@@ -88,7 +88,8 @@ a { color: inherit; }
 header.nav { position: sticky; top: 0; z-index: 30; background: var(--bg); border-bottom: 1px solid var(--line); }
 header.nav .wrap { display: flex; align-items: center; gap: 24px; height: 64px; }
 .brand { font: 700 20px var(--font-web); text-decoration: none; display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: .02em; white-space: nowrap; }
-.brand .sq { width: 12px; height: 12px; background: var(--rg-green); animation: pulse 2.4s ease-in-out infinite; }
+/* two pulses on load, then still: nothing loops forever without a pause control (WCAG 2.2.2) */
+.brand .sq { width: 12px; height: 12px; background: var(--rg-green); animation: pulse 2.4s ease-in-out 2; }
 @keyframes pulse { 50% { background: var(--rg-peach); } }
 nav.links { margin-left: auto; display: flex; gap: 24px; font: 500 16px var(--font-web); }
 nav.links a { text-decoration: none; position: relative; padding: 4px 0; }
@@ -101,7 +102,7 @@ nav.links a:hover::after, nav.links a[aria-current="true"]::after { right: 0; }
 .icon-btn { width: 40px; height: 40px; display: grid; place-items: center; background: transparent; border: 0; color: var(--fg); cursor: pointer; }
 
 /* hero */
-.hero { position: relative; padding: 72px 0 0; overflow: hidden; }
+.hero { position: relative; padding: 72px 0 96px; overflow: hidden; }
 .hero-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 64px; align-items: start; }
 h1 { margin: 12px 0 0; font: 700 clamp(56px, 8.4vw, 112px)/.92 var(--font-web); text-transform: uppercase; letter-spacing: -.01em; }
 h1 .acc { color: var(--accent-lg); }
@@ -140,21 +141,6 @@ h1 .acc { color: var(--accent-lg); }
 .metric .live.on { animation: led 1.2s steps(2) 3; }
 @keyframes led { 50% { background: var(--rg-peach); } }
 
-/* waveform: three lines, slow, each at its own speed */
-.wave-row { position: relative; margin-top: 56px; }
-.wave { display: block; width: 100%; height: 80px; }
-.pause { position: absolute; right: max(24px, env(safe-area-inset-right, 0px)); top: -40px; width: 32px; height: 32px; display: grid; place-items: center; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
-.pause:hover { color: var(--fg); }
-.pause .i-play, .paused .pause .i-pause { display: none; }
-.paused .pause .i-play { display: block; }
-/* WCAG 2.2.2: one control pauses every ambient animation */
-.paused .wave g, .paused .brand .sq, .paused .readout .cur { animation-play-state: paused; }
-.wave path { fill: none; stroke-width: 2; }
-.wave .t1 { animation: flow 22s linear infinite; }
-.wave .t2 { animation: flow 31s linear infinite; }
-.wave .t3 { animation: flow 43s linear infinite reverse; }
-.wave .t3 path { stroke: var(--wave-3); stroke-width: 1.5; }
-@keyframes flow { to { transform: translateX(-2400px); } }
 
 /* bands */
 .band { padding: 96px 0; scroll-margin-top: 64px; }
@@ -257,7 +243,7 @@ svg.cables .port.hot { stroke: var(--rg-peach); }
 svg.cables .sig { fill: var(--rg-cream); }
 .readout { margin-top: 16px; padding: 12px 14px; background: var(--rg-graphite-800); font: 400 13px/1.5 var(--font-code); color: var(--rg-cream); min-height: 64px; }
 .readout .p { color: var(--rg-peach); }
-.readout .cur { display: inline-block; width: 8px; height: 14px; background: var(--rg-peach); vertical-align: -2px; animation: blink 1s steps(2) infinite; }
+.readout .cur { display: inline-block; width: 8px; height: 14px; background: var(--rg-peach); vertical-align: -2px; animation: blink 1s steps(2) 4; } /* 4 s, restarted by the script after each typed text */
 @keyframes blink { 50% { opacity: 0; } }
 
 .card { background: var(--surface); box-shadow: var(--card-edge); clip-path: var(--clip); padding: 32px 28px 28px; display: grid; gap: 16px; }
@@ -380,7 +366,7 @@ footer a { color: var(--rg-cream); }
   @page { size: A4; margin: 12mm 13mm 13mm; }
   :root { --bg: #fff; --surface: #fff; --fg: #323232; --muted: #6B6560; --accent-lg: #37604F; --accent: #37604F; --line: #EDE7E1; --card-edge: none; }
   body { font-size: 10.5pt; line-height: 1.35; background: #fff; }
-  header.nav, .skip, .wave-row, .rack, .tabs, .showall, .copy, .toast, .used, .band.green, .path, .board-wrap, .sec-head p, .metric .live, .rotor .slot, .exp-out { display: none !important; }
+  header.nav, .skip, .rack, .tabs, .showall, .copy, .toast, .used, .band.green, .path, .board-wrap, .sec-head p, .metric .live, .rotor .slot, .exp-out { display: none !important; }
   .exp { display: block; } .exp-side { position: static; padding: 0; margin: 0; } .exp-side .sec-head { margin-bottom: 5pt; }
   .rotor-all { display: inline; position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; color: #37604F; }
   .wrap { max-width: none; padding: 0; }
@@ -407,6 +393,7 @@ footer a { color: var(--rg-cream); }
   .area { background: none !important; box-shadow: none !important; clip-path: none; padding: 0; break-inside: avoid; }
   .area .yr { color: #6B6560; } .area h4 { font-size: 10.5pt; } .area p { color: #323232; font-size: 9.5pt; } .mini { display: none; }
   .panel[hidden] { display: block !important; }
+  .panel.web-only { display: none !important; } /* 06 "this site": on the web only, the PDF stays a 2-page CV */
   .case { display: block; margin: 0 0 8pt; break-inside: avoid; }
   .card { clip-path: none; padding: 0; gap: 3pt; }
   .card h3 { font-size: 12.5pt; } .card .ctx { margin: 0; } .card .top { font-size: 8.5pt; }
@@ -436,8 +423,6 @@ footer a { color: var(--rg-cream); }
   <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></symbol>
   <symbol id="i-mail" viewBox="0 0 24 24"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/></symbol>
   <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
-  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="14" y="3" width="5" height="18" rx="1"/><rect x="5" y="3" width="5" height="18" rx="1"/></symbol>
-  <symbol id="i-play" viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
   <symbol id="i-sun-moon" viewBox="0 0 24 24"><path d="M12 2v2"/><path d="M14.837 16.385a6 6 0 1 1-7.223-7.222c.624-.147.97.66.715 1.248a4 4 0 0 0 5.26 5.259c.589-.255 1.396.09 1.248.715"/><path d="M16 12a4 4 0 0 0-4-4"/><path d="m19 5-1.256 1.256"/><path d="M20 12h2"/></symbol>
 </svg>
@@ -492,7 +477,7 @@ footer a { color: var(--rg-cream); }
             <div><dt data-i18n="meta.tz"></dt><dd>UTC+2/+3</dd></div>
             <div><dt data-i18n="meta.english"></dt><dd>B1</dd></div>
             <div><dt data-i18n="meta.prod"></dt><dd id="prod" data-since="2022-11"></dd></div>
-            <div><dt data-i18n="meta.updated"></dt><dd data-i18n="meta.updatedValue"></dd></div>
+            <div><dt data-i18n="meta.updated"></dt><dd id="updated"></dd></div>
           </dl>
         </div>
         <div class="metrics">
@@ -501,14 +486,6 @@ footer a { color: var(--rg-cream); }
           <div class="metric"><span class="live" aria-hidden="true"></span><b data-count="494">494</b><span data-i18n="metric.merged"></span></div>
         </div>
       </div>
-    </div>
-    <div class="wave-row">
-      <button class="pause" type="button" id="pause" aria-pressed="false" data-i18n-attr="aria-label:a11y.pause"><svg class="ico i-pause" aria-hidden="true"><use href="#i-pause"/></svg><svg class="ico i-play" aria-hidden="true"><use href="#i-play"/></svg></button>
-      <svg class="wave" viewBox="0 0 2400 80" preserveAspectRatio="none" aria-hidden="true">
-        <g class="t1"><path id="w1" stroke="#559479"/></g>
-        <g class="t2"><path id="w2" stroke="#F89D6A"/></g>
-        <g class="t3"><path id="w3"/></g>
-      </svg>
     </div>
   </div>
 
@@ -554,6 +531,7 @@ footer a { color: var(--rg-cream); }
         <button role="tab" id="tab-p3" aria-controls="p3" aria-selected="false" tabindex="-1"><span class="n">03</span><span data-i18n="tab.ai"></span></button>
         <button role="tab" id="tab-p4" aria-controls="p4" aria-selected="false" tabindex="-1"><span class="n">04</span><span data-i18n="tab.adapt"></span></button>
         <button role="tab" id="tab-p5" aria-controls="p5" aria-selected="false" tabindex="-1"><span class="n">05</span><span data-i18n="tab.game"></span></button>
+        <button role="tab" id="tab-p6" aria-controls="p6" aria-selected="false" tabindex="-1"><span class="n">06</span><span data-i18n="tab.site"></span></button>
       </div>
 
       <div class="panel" id="p1" role="tabpanel" aria-labelledby="tab-p1">
@@ -718,6 +696,36 @@ footer a { color: var(--rg-cream); }
           </article>
         </div>
       </div>
+
+      <!-- 06: how this site is built. Web only: the PDF stays a 2-page CV (see the print styles) -->
+      <div class="panel web-only" id="p6" role="tabpanel" aria-labelledby="tab-p6" hidden>
+        <div class="case">
+          <div class="rack">
+            <div class="rhead"><span data-i18n="c6.rack"></span><span data-i18n="c6.state"></span></div>
+            <div class="bay" data-links="rules-claude,claude-review,claude-qa,claude-checks,checks-deploy">
+              <svg class="cables" aria-hidden="true"></svg>
+              <button class="mod" type="button" aria-pressed="false" data-id="rules" data-i18n-text="c6.m.rules.x"><span class="led"></span><b data-i18n="c6.m.rules.b"></b><small data-i18n="c6.m.rules.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="claude" data-i18n-text="c6.m.claude.x"><span class="led"></span><b>Claude Code</b><small data-i18n="c6.m.claude.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="review" data-i18n-text="c6.m.review.x"><span class="led"></span><b data-i18n="c6.m.review.b"></b><small data-i18n="c6.m.review.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="qa" data-i18n-text="c6.m.qa.x"><span class="led"></span><b data-i18n="c6.m.qa.b"></b><small data-i18n="c6.m.qa.s"></small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="checks" data-i18n-text="c6.m.checks.x"><span class="led"></span><b data-i18n="c6.m.checks.b"></b><small>Playwright · axe</small></button>
+              <button class="mod" type="button" aria-pressed="false" data-id="deploy" data-i18n-text="c6.m.deploy.x"><span class="led"></span><b data-i18n="c6.m.deploy.b"></b><small>GitHub Actions</small></button>
+            </div>
+            <div class="readout"><span aria-hidden="true"><span class="p">›</span><span class="tx" data-i18n="c6.ready"></span> <span class="cur"></span></span><span class="sr-only live" aria-live="polite" data-i18n="c6.ready"></span></div>
+          </div>
+          <article class="card">
+            <div class="top"><span class="pill" data-i18n="c6.pill"></span><span data-i18n="c6.when"></span></div>
+            <h3 data-i18n="c6.title"></h3>
+            <div class="ctx" data-i18n="c6.ctx"></div>
+            <dl class="kv"><dt data-i18n="lbl.role"></dt><dd data-i18n="c6.role"></dd></dl>
+            <div class="prob"><div class="lbl" data-i18n="lbl.problem"></div><span data-i18n="c6.problem"></span></div>
+            <div class="did"><div class="lbl" data-i18n="lbl.did"></div><ul><li data-i18n="c6.d1"></li><li data-i18n="c6.d2"></li><li data-i18n="c6.d3"></li></ul></div>
+            <div class="hard"><div class="lbl" data-i18n="c6.hardLbl"></div><span data-i18n="c6.hard"></span></div>
+            <div class="nums"><div><b data-count="3">3</b><span data-i18n="c6.n1"></span></div><div><b data-count="10">10</b><span data-i18n="c6.n2"></span></div><div><b data-count="8">8</b><span data-i18n="c6.n3"></span></div></div>
+            <div class="stack">Claude Code · Playwright · axe-core · GitHub Actions · Cloudflare Workers</div>
+          </article>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -796,38 +804,17 @@ footer a { color: var(--rg-cream); }
     prod.textContent = T.years[new Intl.PluralRules(lang).select(n)].replace("{n}", plus ? n + "+" : String(n));
   })();
 
-  // one control pauses every ambient animation (WCAG 2.2.2); the choice is remembered.
-  // Fixed name "Pause animations" + aria-pressed, so "pressed" always means "paused".
-  const pauseBtn = document.getElementById("pause");
-  function setPaused(on) {
-    root.classList.toggle("paused", on);
-    pauseBtn.setAttribute("aria-pressed", String(on));
-    try { localStorage.setItem("paused", on ? "1" : "0"); } catch (e) {}
-  }
-  pauseBtn.addEventListener("click", () => setPaused(!root.classList.contains("paused")));
-  try { if (localStorage.getItem("paused") === "1") setPaused(true); } catch (e) {}
-
-  // rotating "I build …"
+  // rotating "I build …". It never stops and there is no pause control: Kyrylo's deliberate exception to
+  // WCAG 2.2.2 (2026-11-10). It stays still under reduced motion, and screen readers get the full list once.
   const slot = document.getElementById("slot"); let wi = 0;
   slot.firstElementChild.textContent = T.rotor[0];
   if (!reduce) setInterval(() => {
-    if (document.hidden || root.classList.contains("paused")) return;
+    if (document.hidden) return;
     wi = (wi + 1) % T.rotor.length;
     const old = slot.firstElementChild; old.className = "out";
     const n = document.createElement("span"); n.className = "in"; n.textContent = T.rotor[wi]; slot.appendChild(n);
     setTimeout(() => { old.remove(); n.className = ""; }, 460);
   }, 2400);
-
-  // waveform: three signals, drawn twice so the loop is seamless
-  function wave(id, amp, f1, f2, phase) {
-    let d = "";
-    for (let x = 0; x <= 4800; x += 6) {
-      const y = 40 + amp * Math.sin((x / 1200) * Math.PI * 2 * f1 + phase) + amp * .4 * Math.sin((x / 1200) * Math.PI * 2 * f2);
-      d += (x ? "L" : "M") + x + " " + y.toFixed(1);
-    }
-    document.getElementById(id).setAttribute("d", d);
-  }
-  wave("w1", 18, 3, 11, 0); wave("w2", 11, 5, 2, 1.3); wave("w3", 24, 2, 7, 2.6);
 
   // count-up when visible (the HTML already holds the final number)
   function countUp(el) {
@@ -933,10 +920,18 @@ footer a { color: var(--rg-cream); }
   function type(out, text, live = out.querySelector(".live")) {
     const tx = out.querySelector(".tx"); clearInterval(out._t);
     live.textContent = text;
-    // only reduced motion skips typing; the pause button is for ambient motion, and typing follows the visitor's own click
+    // only reduced motion skips typing (and the CSS turns the blink off there)
     if (reduce) { tx.textContent = text; return; }
     const words = text.split(" "); let i = 0; tx.textContent = "";
-    out._t = setInterval(() => { tx.textContent += (i ? " " : "") + words[i++]; if (i >= words.length) clearInterval(out._t); }, 45);
+    out._t = setInterval(() => {
+      tx.textContent += (i ? " " : "") + words[i++];
+      if (i >= words.length) { clearInterval(out._t); blinkAgain(out.querySelector(".cur")); }
+    }, 45);
+  }
+  // the cursor blinks for 4 s after each typed text, then stays solid (no endless blinking)
+  // (a finished CSS animation is gone from getAnimations(), so restart it by removing and re-adding it)
+  function blinkAgain(cur) {
+    cur.style.animation = "none"; void cur.offsetWidth; cur.style.animation = "";
   }
   // 04: learner path follows the clicked module's step
   function moveDot(panel, step) {

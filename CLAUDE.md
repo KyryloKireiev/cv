@@ -42,6 +42,9 @@ Always switch and run in the *same* command:
 A PreToolUse hook (`.claude/hooks/verify-before-commit.sh`) blocks Claude's `git commit`
 while `npm run verify` fails. It is a strong guard, not a guarantee: it checks the working
 tree (not the staged snapshot) and does not block if it times out. See the script header.
+**Inactive for v0:** it exits early while there is no root `package.json`, so today it blocks
+nothing. Until the Astro build exists, run the v0 build and checks yourself (see "v0 prototype");
+CI runs them on every PR and before every deploy.
 
 ## Hard rules
 
@@ -54,7 +57,10 @@ tree (not the staged snapshot) and does not block if it times out. See the scrip
 4. **Tests first** for behaviour (superpowers:test-driven-development). Each e2e test runs
    for every locale.
 5. **Accessibility is not optional:** WCAG 2.2 AA, axe clean, keyboard reachable, visible
-   focus, every animation respects `prefers-reduced-motion`.
+   focus, every animation respects `prefers-reduced-motion`. One deliberate exception (Kyrylo's
+   decision, 2026-11-10): the hero's rotating "I build …" word cycles with no pause control,
+   against WCAG 2.2.2; it stays still under reduced motion. Every other animation must stop on
+   its own within 5 s, since the page has no pause control.
 6. **Performance budget:** Lighthouse performance ≥ 95, accessibility = 100,
    best-practices ≥ 95, SEO ≥ 95 on mobile. No third-party trackers or runtime CDNs.
 7. **Facts about Kyrylo must have a source** (old CV, GitHub, GitLab, or his own words).
@@ -81,22 +87,25 @@ In this order:
 | `qa-tester` agent | Sees the site like a visitor; catches what tests didn't think of |
 | `content-researcher` agent | Reads many sources so the main session only gets sourced conclusions |
 | `cv-content` skill | One guide for editing text and adding languages (for Claude and Kyrylo) |
-| verify-before-commit hook | Turns "verify before commit" from a rule Claude may forget into an enforced check |
+| verify-before-commit hook | Turns "verify before commit" from a rule Claude may forget into an enforced check (from the Astro build on; inactive for v0) |
 | superpowers plugin | The process: brainstorm → plan → test-first → verify before claiming done |
 | frontend-design plugin | Pushes the design away from the generic AI-site look |
 | playwright plugin | Lets Claude open, click and screenshot the real page |
 | context7 plugin | Current library docs instead of possibly stale training knowledge |
 | pr-review-toolkit plugin | Optional specialist second opinions (tests, silent failures, simplification). Never replaces `strict-reviewer` |
 | security-guidance plugin | Warns on risky code patterns as they're written |
-| commit-commands plugin | `/commit`, `/commit-push-pr` shortcuts; the hook still enforces verify |
+| commit-commands plugin | `/commit`, `/commit-push-pr` shortcuts; the hook enforces verify once it is active |
 
 ## v0 prototype
 
 Until the Astro build exists, the deployed site is `prototype/`: a hand-written page
 (`src/index.html`) with all text in `src/i18n.json`. `tools/build.mjs` checks locale
-parity, renders `/` and `/uk/`, favicons and both PDFs into `dist/`; `tools/check.mjs`
-runs browser checks (links, PDF, copy, theme, tabs, no third-party requests, no untranslated
-Ukrainian text). Run both before committing prototype changes. Same content rules apply.
+parity, renders `/` and `/uk/`, favicons, both PDFs and the link preview cards
+(`og-<locale>.png`) into `dist/`; `tools/check.mjs` runs browser checks (links, PDF, copy,
+theme, tabs, no third-party requests, no untranslated Ukrainian text). Run both before
+committing prototype changes. Same content rules apply. The build needs the full git history:
+the hero's "Updated" month is the last commit touching `prototype/src`, and a shallow clone or
+a zip download fails the build on purpose.
 
 ## Reference
 
